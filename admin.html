@@ -626,22 +626,13 @@ function printCard() {
 }
 
 function openCardWindow({ name, pos, co, ph, em, web, addr, ig, wa, cardUrl, photo, qrDataUrl }) {
-  const win = window.open('', '_blank', 'width=900,height=700');
+  const win = window.open('', '_blank', 'width=980,height=760');
+
   const avatarHTML = photo
     ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22pt;color:#C4A882;font-weight:400">${(name||'K').charAt(0).toUpperCase()}</div>`;
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:24pt;color:#C4A882;font-weight:500">${(name||'K').charAt(0).toUpperCase()}</div>`;
 
-  const contactLines = [
-    ph  ? `<div class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="#C4A882" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3.06A2 2 0 0 1 8.64 4a12.06 12.06 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.19 6.19l.99-.98a2 2 0 0 1 2.11-.45 12.06 12.06 0 0 0 2.81.7A2 2 0 0 1 22 17v-.08z"/></svg>${ph}</div>` : '',
-    em  ? `<div class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="#C4A882" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${em}</div>` : '',
-    web ? `<div class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="#C4A882" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${web.replace(/^https?:\/\//,'')}</div>` : '',
-  ].filter(Boolean).join('');
-
-  const socialLines = [
-    ig ? `<div class="sc">@${ig}</div>` : '',
-    wa ? `<div class="sc">wa: +62${wa}</div>` : '',
-    addr ? `<div class="sc">${addr}</div>` : '',
-  ].filter(Boolean).join('');
+  const slug = document.getElementById('slug').value || '';
 
   win.document.write(`<!DOCTYPE html>
 <html>
@@ -652,185 +643,276 @@ function openCardWindow({ name, pos, co, ph, em, web, addr, ig, wa, cardUrl, pho
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#D4CEC8;font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 24px 60px;gap:0}
+body{background:#CCCAC6;font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:36px 24px 60px;gap:0}
 
-/* TOOLBAR */
-.toolbar{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;justify-content:center}
-.tbtn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.73rem;letter-spacing:0.12em;text-transform:uppercase;font-weight:400;transition:all 0.18s ease;border-radius:2px}
-.tbtn-primary{background:#2C2825;color:#F7F3EE}
-.tbtn-primary:hover{background:#C4A882;color:#2C2825}
-.tbtn-secondary{background:transparent;color:#2C2825;border:1px solid rgba(44,40,37,0.3)}
-.tbtn-secondary:hover{border-color:#C4A882;color:#C4A882}
+.toolbar{display:flex;gap:10px;margin-bottom:32px;flex-wrap:wrap;justify-content:center}
+.tbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.72rem;letter-spacing:0.13em;text-transform:uppercase;font-weight:400;transition:all 0.18s;border-radius:2px}
+.tbtn-p{background:#2C2825;color:#F7F3EE}
+.tbtn-p:hover{background:#C4A882;color:#2C2825}
+.tbtn-s{background:transparent;color:#2C2825;border:1px solid rgba(44,40,37,0.35)}
+.tbtn-s:hover{border-color:#C4A882;color:#8B6F4E}
+.tbtn:disabled{opacity:0.45;cursor:not-allowed}
 
-/* LABEL */
-.side-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(44,40,37,0.5);margin-bottom:10px;text-align:center;font-family:'DM Sans',sans-serif}
+.side-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(44,40,37,0.45);margin-bottom:10px;text-align:center}
+.card-pair{display:flex;gap:48px;flex-wrap:wrap;justify-content:center}
 
-/* CARD BASE — 85.6mm × 54mm at 96dpi = 323 × 204px; we scale 3x for quality */
-.card-scene{display:flex;flex-direction:column;align-items:center;gap:24px}
-.card-pair{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
-
-/* FRONT */
+/* ── CARD SIZE: 85.6mm × 54mm at 96dpi ≈ 323 × 204px, displayed 2× */
+/* FRONT ── */
 #cardFront{
-  width:323px;height:204px;
+  width:646px;height:408px;
   background:#F7F3EE;
+  border-radius:12px;
   position:relative;overflow:hidden;
-  box-shadow:0 8px 40px rgba(44,40,37,0.18);
+  box-shadow:0 12px 48px rgba(44,40,37,0.22);
   flex-shrink:0;
 }
-/* Left gold stripe */
-#cardFront::before{content:'';position:absolute;left:0;top:0;bottom:0;width:11px;background:linear-gradient(180deg,#D4B896 0%,#C4A882 50%,#B09060 100%)}
-/* Subtle texture dots top right */
-#cardFront::after{content:'';position:absolute;top:12px;right:12px;width:48px;height:48px;
-  background-image:radial-gradient(circle,rgba(196,168,130,0.35) 1px,transparent 1px);
-  background-size:6px 6px;border-radius:2px}
 
-.front-inner{position:absolute;inset:0;padding:16px 16px 14px 24px;display:flex;flex-direction:column;justify-content:space-between}
+/* Wave SVG layers */
+.wave-back{position:absolute;top:0;right:0;width:60%;height:100%}
+.wave-front{position:absolute;top:0;right:0;width:55%;height:100%}
 
-.front-top{display:flex;align-items:flex-start;gap:14px}
-.front-avatar{width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#EDE8E0;border:1.5px solid rgba(196,168,130,0.5);position:relative;z-index:1}
-.front-text{flex:1;padding-top:2px}
-.front-name{font-family:'Cormorant Garamond',serif;font-size:14.5pt;font-weight:500;color:#2C2825;line-height:1.15;letter-spacing:-0.01em}
-.front-pos{font-size:5.5pt;letter-spacing:0.18em;text-transform:uppercase;color:#6B6560;margin-top:4px;font-weight:400;line-height:1.4}
-.front-co{font-family:'Cormorant Garamond',serif;font-size:8pt;color:#C4A882;font-style:italic;font-weight:300;margin-top:2px}
+/* Avatar circle top-right area */
+.f-avatar{
+  position:absolute;top:32px;right:52px;
+  width:88px;height:88px;border-radius:50%;
+  overflow:hidden;background:#EDE8E0;
+  border:2.5px solid rgba(196,168,130,0.6);
+  z-index:10;
+}
 
-.front-contacts{display:flex;flex-direction:column;gap:3px}
-.ct{display:flex;align-items:center;gap:5px;font-size:6pt;color:#4A4441;font-weight:300;line-height:1.3}
-.ct svg{width:7px;height:7px;flex-shrink:0}
+/* QR top-right */
+.f-qr{
+  position:absolute;top:28px;right:28px;
+  background:#fff;padding:7px;border-radius:3px;
+  z-index:10;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+.f-qr img{width:70px;height:70px;display:block}
+.f-qr-none{width:70px;height:70px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#aaa}
 
-.front-bottom{display:flex;align-items:flex-end;justify-content:space-between}
-.front-brand{font-family:'Cormorant Garamond',serif;font-size:6.5pt;color:#C4A882;letter-spacing:0.1em}
-.front-brand span{display:block;font-family:'DM Sans',sans-serif;font-size:4.5pt;letter-spacing:0.18em;text-transform:uppercase;color:#9A9390;font-style:normal;margin-top:1px}
+/* Left content */
+.f-left{
+  position:absolute;left:0;top:0;bottom:0;
+  width:52%;
+  padding:32px 28px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  z-index:5;
+}
+.f-name{font-family:'Cormorant Garamond',serif;font-size:21pt;font-weight:500;color:#2C2825;line-height:1.15;letter-spacing:-0.01em;margin-bottom:4px}
+.f-pos{font-size:7pt;letter-spacing:0.2em;text-transform:uppercase;color:#7A7370;font-weight:400;margin-bottom:3px}
+.f-co{font-family:'Cormorant Garamond',serif;font-size:9.5pt;color:#C4A882;font-style:italic;font-weight:300}
 
-/* BACK */
+.f-contacts{display:flex;flex-direction:column;gap:5px;margin-top:auto;padding-top:18px}
+.fc{display:flex;align-items:center;gap:8px;font-size:7.5pt;color:#4A4441;font-weight:300;line-height:1.3}
+.fc-icon{width:16px;height:16px;flex-shrink:0;background:#C4A882;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.fc-icon svg{width:8px;height:8px;stroke:#fff;stroke-width:2.5;fill:none}
+
+.f-brand{font-family:'Cormorant Garamond',serif;font-size:7.5pt;color:#C4A882;letter-spacing:0.1em}
+.f-brand span{display:block;font-family:'DM Sans',sans-serif;font-size:5pt;letter-spacing:0.2em;text-transform:uppercase;color:#AAA49F;font-style:normal;margin-top:1.5px}
+
+/* ── BACK ── */
 #cardBack{
-  width:323px;height:204px;
+  width:646px;height:408px;
   background:#2C2825;
+  border-radius:12px;
   position:relative;overflow:hidden;
-  box-shadow:0 8px 40px rgba(44,40,37,0.25);
+  box-shadow:0 12px 48px rgba(44,40,37,0.28);
   flex-shrink:0;
 }
-/* Gold top line */
-#cardBack::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#B09060,#C4A882,#D4B896,#C4A882,#B09060)}
-/* Geometric bg pattern */
-#cardBack::after{content:'';position:absolute;bottom:-20px;right:-20px;width:120px;height:120px;border:1px solid rgba(196,168,130,0.12);border-radius:50%}
 
-.back-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:18px 20px 18px 24px}
+/* Back wave */
+.b-wave-tl{position:absolute;top:0;left:0;width:55%;height:100%}
+.b-wave-br{position:absolute;bottom:0;right:0;width:50%;height:100%}
 
-.back-left{display:flex;flex-direction:column;justify-content:center;gap:0}
-.back-brand{font-family:'Cormorant Garamond',serif;font-size:16pt;font-weight:400;color:#F0EBE4;letter-spacing:0.04em;line-height:1.1}
-.back-brand em{color:#C4A882;font-style:italic}
-.back-tagline{font-size:5.2pt;letter-spacing:0.22em;text-transform:uppercase;color:rgba(240,235,228,0.4);margin-top:6px;font-weight:300;line-height:1.5;max-width:130px}
-.back-divider{width:28px;height:1px;background:#C4A882;margin:8px 0;opacity:0.6}
-.back-social{display:flex;flex-direction:column;gap:2.5px}
-.sc{font-size:5.5pt;color:rgba(240,235,228,0.55);font-weight:300;letter-spacing:0.04em;line-height:1.4}
+/* Logo center-left */
+.b-logo{
+  position:absolute;
+  left:48px;top:50%;transform:translateY(-50%);
+  z-index:5;display:flex;flex-direction:column;align-items:flex-start;gap:0;
+}
+.b-logo-icon{margin-bottom:14px}
+.b-logo-name{font-family:'Cormorant Garamond',serif;font-size:20pt;font-weight:500;color:#F0EBE4;letter-spacing:0.06em;line-height:1.1}
+.b-logo-name em{color:#C4A882;font-style:normal}
+.b-logo-divider{width:36px;height:1.5px;background:linear-gradient(90deg,#C4A882,#8B6F4E);margin:10px 0}
+.b-logo-tagline{font-size:5.5pt;letter-spacing:0.28em;text-transform:uppercase;color:rgba(240,235,228,0.45);font-weight:300;line-height:1.6}
 
-.back-right{display:flex;flex-direction:column;align-items:center;gap:7px}
-.back-qr{background:#F7F3EE;padding:7px;border-radius:2px}
-.back-qr img{width:72px;height:72px;display:block}
-.back-qr-label{font-size:4.5pt;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,235,228,0.35);text-align:center;font-weight:300}
+/* QR right side */
+.b-qr-wrap{
+  position:absolute;right:44px;top:50%;transform:translateY(-50%);
+  z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.b-qr{background:#F7F3EE;padding:10px;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.b-qr img{width:96px;height:96px;display:block}
+.b-qr-label{font-size:5pt;letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,235,228,0.3);text-align:center;font-weight:300}
 
-/* Corner circles decoration */
-.corner-tl{position:absolute;top:-18px;left:-18px;width:60px;height:60px;border:1px solid rgba(196,168,130,0.08);border-radius:50%}
-.corner-br{position:absolute;bottom:-24px;left:24px;width:80px;height:80px;border:1px solid rgba(196,168,130,0.06);border-radius:50%}
+/* Top gold bar */
+#cardBack::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#8B6F4E,#C4A882,#E8D4B0,#C4A882,#8B6F4E);z-index:10}
 
-/* PRINT */
 @media print{
-  body{background:white;padding:10mm}
-  .toolbar{display:none}
-  .side-label{color:#999}
-  .card-pair{gap:10mm;page-break-inside:avoid}
-  #cardFront,#cardBack{box-shadow:none}
+  body{background:white;padding:0}
+  .toolbar,.side-label{display:none}
+  .card-pair{gap:8mm;flex-direction:column;align-items:center}
+  #cardFront,#cardBack{border-radius:6px;box-shadow:none;page-break-after:always}
 }
 </style>
 </head>
 <body>
 
 <div class="toolbar">
-  <button class="tbtn tbtn-primary" onclick="saveSide('front')">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Simpan Depan (PNG)
+  <button class="tbtn tbtn-p" id="btnFront" onclick="saveSide('front')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Simpan Depan
   </button>
-  <button class="tbtn tbtn-primary" onclick="saveSide('back')">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Simpan Belakang (PNG)
+  <button class="tbtn tbtn-p" id="btnBack" onclick="saveSide('back')">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Simpan Belakang
   </button>
-  <button class="tbtn tbtn-secondary" onclick="window.print()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+  <button class="tbtn tbtn-s" onclick="window.print()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
     Print
   </button>
 </div>
 
-<div class="card-scene">
-  <div class="card-pair">
-    <!-- FRONT -->
-    <div>
-      <div class="side-label">Depan</div>
-      <div id="cardFront">
-        <div class="front-inner">
-          <div class="front-top">
-            <div class="front-avatar">${avatarHTML}</div>
-            <div class="front-text">
-              <div class="front-name">${name}</div>
-              <div class="front-pos">${pos}</div>
-              <div class="front-co">${co}</div>
-            </div>
-          </div>
-          <div class="front-contacts">${contactLines}</div>
-          <div class="front-bottom">
-            <div class="front-brand">Kawan Baik Bali<span>Hospitality Supplier Premium</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="card-pair">
 
-    <!-- BACK -->
-    <div>
-      <div class="side-label">Belakang</div>
-      <div id="cardBack">
-        <div class="corner-tl"></div>
-        <div class="corner-br"></div>
-        <div class="back-inner">
-          <div class="back-left">
-            <div class="back-brand">Kawan<br><em>Baik Bali</em></div>
-            <div class="back-tagline">Hospitality Supplier Premium · Bali</div>
-            <div class="back-divider"></div>
-            <div class="back-social">${socialLines}</div>
-          </div>
-          <div class="back-right">
-            <div class="back-qr">
-              ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR">` : '<div style="width:72px;height:72px;background:#eee"></div>'}
-            </div>
-            <div class="back-qr-label">Scan untuk profil</div>
-          </div>
-        </div>
+  <!-- ══ FRONT ══ -->
+  <div>
+    <div class="side-label">Depan</div>
+    <div id="cardFront">
+
+      <!-- Wave back layer (darker) -->
+      <svg class="wave-back" viewBox="0 0 400 408" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M120,0 C200,80 160,200 180,408 L400,408 L400,0 Z" fill="#3D3530"/>
+      </svg>
+      <!-- Wave front layer (accent) -->
+      <svg class="wave-front" viewBox="0 0 380 408" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M80,0 C170,100 120,260 150,408 L380,408 L380,0 Z" fill="#C4A882" opacity="0.18"/>
+      </svg>
+      <!-- Wave gold outline -->
+      <svg style="position:absolute;top:0;right:0;width:60%;height:100%;z-index:3" viewBox="0 0 400 408" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M120,0 C200,80 160,200 180,408" fill="none" stroke="#C4A882" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+
+      <!-- QR (top right, inside dark wave area) -->
+      <div class="f-qr" style="top:24px;right:24px">
+        ${qrDataUrl
+          ? `<img src="${qrDataUrl}" alt="QR">`
+          : `<div class="f-qr-none">QR</div>`}
       </div>
+
+      <!-- Avatar (below QR) -->
+      <div class="f-avatar" style="top:120px;right:37px">${avatarHTML}</div>
+
+      <!-- Left info -->
+      <div class="f-left">
+        <div>
+          <div class="f-name">${name}</div>
+          <div class="f-pos">${pos}</div>
+          <div class="f-co">${co}</div>
+        </div>
+        <div class="f-contacts">
+          ${ph ? `<div class="fc"><div class="fc-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3.06A2 2 0 0 1 8.64 4a12.06 12.06 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.19 6.19l.99-.98a2 2 0 0 1 2.11-.45 12.06 12.06 0 0 0 2.81.7A2 2 0 0 1 22 17z"/></svg></div><span>${ph}</span></div>` : ''}
+          ${em ? `<div class="fc"><div class="fc-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span>${em}</span></div>` : ''}
+          ${web ? `<div class="fc"><div class="fc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><span>${web.replace(/^https?:\/\//,'')}</span></div>` : ''}
+          ${addr ? `<div class="fc"><div class="fc-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><span>${addr}</span></div>` : ''}
+        </div>
+        <div class="f-brand">Kawan Baik Bali<span>Hospitality Supplier Premium · Bali</span></div>
+      </div>
+
     </div>
   </div>
+
+  <!-- ══ BACK ══ -->
+  <div>
+    <div class="side-label">Belakang</div>
+    <div id="cardBack">
+
+      <!-- Wave TL (gold) -->
+      <svg class="b-wave-tl" viewBox="0 0 360 408" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,0 L260,0 C180,80 200,200 160,408 L0,408 Z" fill="#C4A882" opacity="0.13"/>
+        <path d="M0,0 L220,0 C150,90 170,210 130,408 L0,408 Z" fill="#C4A882" opacity="0.08"/>
+      </svg>
+      <!-- Wave BR (slightly lighter charcoal) -->
+      <svg class="b-wave-br" viewBox="0 0 340 408" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M340,408 L340,150 C260,200 200,180 0,250 L0,408 Z" fill="rgba(255,255,255,0.03)"/>
+      </svg>
+
+      <!-- Logo area (left) -->
+      <div class="b-logo">
+        <!-- Palm tree SVG icon (redrawn from logo) -->
+        <div class="b-logo-icon">
+          <svg width="64" height="52" viewBox="0 0 64 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Island/ground -->
+            <ellipse cx="32" cy="46" rx="18" ry="4.5" fill="#C4A882" opacity="0.7"/>
+            <!-- Left palm trunk -->
+            <path d="M26 44 Q22 34 18 22 Q20 24 24 30 Q26 36 28 44Z" fill="#C4A882" opacity="0.85"/>
+            <!-- Right palm trunk -->
+            <path d="M36 44 Q40 33 44 20 Q42 23 38 30 Q36 37 34 44Z" fill="#C4A882" opacity="0.85"/>
+            <!-- Center trunk -->
+            <path d="M32 44 Q31 32 30 16" stroke="#C4A882" stroke-width="2" stroke-linecap="round" opacity="0.9"/>
+            <!-- Left fronds -->
+            <path d="M30 16 Q20 10 12 14 Q18 12 24 18 Q27 14 30 16Z" fill="#C4A882"/>
+            <path d="M30 16 Q16 6 14 0 Q20 6 26 14 Q28 12 30 16Z" fill="#C4A882" opacity="0.75"/>
+            <!-- Right fronds -->
+            <path d="M30 16 Q40 10 48 14 Q42 12 36 18 Q33 14 30 16Z" fill="#C4A882"/>
+            <path d="M30 16 Q46 6 48 0 Q42 6 34 14 Q32 12 30 16Z" fill="#C4A882" opacity="0.75"/>
+            <!-- Top frond -->
+            <path d="M30 16 Q28 6 28 0 Q30 8 30 16Z" fill="#C4A882" opacity="0.7"/>
+            <!-- Water ripple lines -->
+            <path d="M14 50 Q24 48 32 50 Q40 52 50 50" stroke="#C4A882" stroke-width="0.8" stroke-linecap="round" opacity="0.4" fill="none"/>
+          </svg>
+        </div>
+        <div class="b-logo-name">KAWAN BAIK<br><em>BALI</em></div>
+        <div class="b-logo-divider"></div>
+        <div class="b-logo-tagline">We Grow Together<br>Hospitality Supplier Premium</div>
+      </div>
+
+      <!-- QR right -->
+      <div class="b-qr-wrap">
+        <div class="b-qr">
+          ${qrDataUrl
+            ? `<img src="${qrDataUrl}" alt="QR Code">`
+            : `<div style="width:96px;height:96px;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#aaa">No QR</div>`}
+        </div>
+        <div class="b-qr-label">Scan profil digital</div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <script>
+const FNAME = '${name.replace(/\s+/g,'_')}';
+
 async function saveSide(side) {
-  const btns = document.querySelectorAll('.tbtn-primary');
-  btns.forEach(b => { b.disabled = true; });
-  const activeBtn = side === 'front' ? btns[0] : btns[1];
-  const origText = activeBtn.innerHTML;
-  activeBtn.innerHTML = 'Menyimpan...';
-
+  const btn = document.getElementById(side === 'front' ? 'btnFront' : 'btnBack');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
   try {
-    const scale = 3;
     const el = document.getElementById(side === 'front' ? 'cardFront' : 'cardBack');
-    const canvas = await html2canvas(el, { scale, useCORS: true, backgroundColor: null, logging: false });
-
+    // Temporarily hide border-radius for clean edges
+    const origBR = el.style.borderRadius;
+    el.style.borderRadius = '0';
+    const canvas = await html2canvas(el, {
+      scale: 4,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      logging: false,
+      imageTimeout: 5000,
+    });
+    el.style.borderRadius = origBR;
     const link = document.createElement('a');
-    const suffix = side === 'front' ? 'Depan' : 'Belakang';
-    link.download = '${name.replace(/\s+/g,'_')}_KartuNama_${co.replace(/\s+/g,'_')}_' + suffix + '.png';
+    link.download = FNAME + '_KartuNama_KawanBaikBali_' + (side === 'front' ? 'Depan' : 'Belakang') + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch(e) {
     alert('Gagal simpan: ' + e.message);
   } finally {
-    btns.forEach(b => { b.disabled = false; });
-    activeBtn.innerHTML = origText;
+    btn.disabled = false;
+    btn.innerHTML = orig;
   }
 }
 <\/script>
