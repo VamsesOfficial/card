@@ -352,7 +352,7 @@ body{background:var(--w);color:var(--c);font-family:var(--sans);font-weight:300;
       </button>
       <button class="btn-s" onclick="printCard()" id="printBtn" disabled>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Print Kartu
+        Preview & Print Kartu
       </button>
       <button class="btn-s" onclick="cancelEdit()">Batal</button>
     </div>
@@ -597,55 +597,257 @@ function generateQR(slug) {
   document.getElementById('qrUrl').style.display = 'block';
 }
 
-// ── Print
+// ── Print / Save card (opens dedicated window with front+back + download PNG + print)
 function printCard() {
-  const name = document.getElementById('name').value || 'Karyawan';
-  const pos  = document.getElementById('position').value || '';
-  const co   = document.getElementById('company').value || 'Kawan Baik Bali';
-  const ph   = document.getElementById('phone').value || '';
-  const em   = document.getElementById('email').value || '';
-  const web  = document.getElementById('website').value || '';
-  const slug = document.getElementById('slug').value || '';
+  const name   = document.getElementById('name').value || 'Karyawan';
+  const pos    = document.getElementById('position').value || '';
+  const co     = document.getElementById('company').value || 'Kawan Baik Bali';
+  const ph     = document.getElementById('phone').value || '';
+  const em     = document.getElementById('email').value || '';
+  const web    = document.getElementById('website').value || '';
+  const addr   = document.getElementById('address').value || '';
+  const ig     = document.getElementById('instagram').value || '';
+  const wa     = document.getElementById('whatsapp').value || '';
+  const slug   = document.getElementById('slug').value || '';
   const cardUrl = CARD_BASE + slug;
+  const photo  = photoBase64 || '';
 
-  const printWin = window.open('', '_blank');
-  printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,300&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+  // Generate QR as data URL using QRCode.js in a temp div
+  const tempDiv = document.createElement('div');
+  tempDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+  document.body.appendChild(tempDiv);
+  new QRCode(tempDiv, { text: cardUrl, width: 200, height: 200, colorDark: '#2C2825', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.H });
+  setTimeout(() => {
+    const qrCanvas = tempDiv.querySelector('canvas');
+    const qrDataUrl = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
+    document.body.removeChild(tempDiv);
+    openCardWindow({ name, pos, co, ph, em, web, addr, ig, wa, cardUrl, photo, qrDataUrl });
+  }, 300);
+}
+
+function openCardWindow({ name, pos, co, ph, em, web, addr, ig, wa, cardUrl, photo, qrDataUrl }) {
+  const win = window.open('', '_blank', 'width=900,height=700');
+  const avatarHTML = photo
+    ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22pt;color:#C4A882;font-weight:400">${(name||'K').charAt(0).toUpperCase()}</div>`;
+
+  const contactLines = [
+    ph  ? `<div class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="#C4A882" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.18h3.06A2 2 0 0 1 8.64 4a12.06 12.06 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.19 6.19l.99-.98a2 2 0 0 1 2.11-.45 12.06 12.06 0 0 0 2.81.7A2 2 0 0 1 22 17v-.08z"/></svg>${ph}</div>` : '',
+    em  ? `<div class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="#C4A882" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${em}</div>` : '',
+    web ? `<div class="ct"><svg viewBox="0 0 24 24" fill="none" stroke="#C4A882" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${web.replace(/^https?:\/\//,'')}</div>` : '',
+  ].filter(Boolean).join('');
+
+  const socialLines = [
+    ig ? `<div class="sc">@${ig}</div>` : '',
+    wa ? `<div class="sc">wa: +62${wa}</div>` : '',
+    addr ? `<div class="sc">${addr}</div>` : '',
+  ].filter(Boolean).join('');
+
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Kartu Nama — ${name}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-@page{size:85.6mm 54mm;margin:0}
-body{width:85.6mm;height:54mm;overflow:hidden;background:#F7F3EE;font-family:'DM Sans',sans-serif;display:flex;align-items:center}
-.card{width:85.6mm;height:54mm;padding:7mm 7mm 7mm 10mm;display:flex;gap:5mm;align-items:center;position:relative;background:#F7F3EE}
-.stripe{position:absolute;left:0;top:0;bottom:0;width:3mm;background:#C4A882}
-.avatar{width:15mm;height:15mm;border-radius:50%;overflow:hidden;flex-shrink:0;background:#EDE8E0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:12pt;color:#C4A882;border:0.5pt solid rgba(44,40,37,0.2)}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.info{flex:1}
-.name{font-family:'Cormorant Garamond',serif;font-size:10.5pt;font-weight:500;color:#2C2825;line-height:1.2;margin-bottom:1mm}
-.pos{font-size:5.8pt;letter-spacing:0.12em;text-transform:uppercase;color:#4A4441;margin-bottom:0.8mm;font-weight:400}
-.co{font-family:'Cormorant Garamond',serif;font-size:7pt;color:#C4A882;font-style:italic;margin-bottom:2.5mm}
-.contacts{display:flex;flex-direction:column;gap:0.7mm}
-.ct{font-size:5.8pt;color:#4A4441;display:flex;align-items:center;gap:1.5mm}
-.logo{position:absolute;bottom:3.5mm;right:4mm;font-family:'Cormorant Garamond',serif;font-size:6pt;color:#C4A882;letter-spacing:0.08em;text-align:right}
-.logo span{display:block;font-size:4.5pt;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-family:'DM Sans',sans-serif;font-style:normal}
-</style></head><body>
-<div class="card">
-<div class="stripe"></div>
-<div class="avatar">${photoBase64 ? `<img src="${photoBase64}">` : name.charAt(0).toUpperCase()}</div>
-<div class="info">
-  <div class="name">${esc(name)}</div>
-  <div class="pos">${esc(pos)}</div>
-  <div class="co">${esc(co)}</div>
-  <div class="contacts">
-    ${ph ? `<div class="ct"><span>✆</span> ${esc(ph)}</div>` : ''}
-    ${em ? `<div class="ct"><span>✉</span> ${esc(em)}</div>` : ''}
-    ${web ? `<div class="ct"><span>⊕</span> ${esc(web.replace(/^https?:\/\//,''))}</div>` : ''}
+body{background:#D4CEC8;font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 24px 60px;gap:0}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;justify-content:center}
+.tbtn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.73rem;letter-spacing:0.12em;text-transform:uppercase;font-weight:400;transition:all 0.18s ease;border-radius:2px}
+.tbtn-primary{background:#2C2825;color:#F7F3EE}
+.tbtn-primary:hover{background:#C4A882;color:#2C2825}
+.tbtn-secondary{background:transparent;color:#2C2825;border:1px solid rgba(44,40,37,0.3)}
+.tbtn-secondary:hover{border-color:#C4A882;color:#C4A882}
+
+/* LABEL */
+.side-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(44,40,37,0.5);margin-bottom:10px;text-align:center;font-family:'DM Sans',sans-serif}
+
+/* CARD BASE — 85.6mm × 54mm at 96dpi = 323 × 204px; we scale 3x for quality */
+.card-scene{display:flex;flex-direction:column;align-items:center;gap:24px}
+.card-pair{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
+
+/* FRONT */
+#cardFront{
+  width:323px;height:204px;
+  background:#F7F3EE;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 40px rgba(44,40,37,0.18);
+  flex-shrink:0;
+}
+/* Left gold stripe */
+#cardFront::before{content:'';position:absolute;left:0;top:0;bottom:0;width:11px;background:linear-gradient(180deg,#D4B896 0%,#C4A882 50%,#B09060 100%)}
+/* Subtle texture dots top right */
+#cardFront::after{content:'';position:absolute;top:12px;right:12px;width:48px;height:48px;
+  background-image:radial-gradient(circle,rgba(196,168,130,0.35) 1px,transparent 1px);
+  background-size:6px 6px;border-radius:2px}
+
+.front-inner{position:absolute;inset:0;padding:16px 16px 14px 24px;display:flex;flex-direction:column;justify-content:space-between}
+
+.front-top{display:flex;align-items:flex-start;gap:14px}
+.front-avatar{width:54px;height:54px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#EDE8E0;border:1.5px solid rgba(196,168,130,0.5);position:relative;z-index:1}
+.front-text{flex:1;padding-top:2px}
+.front-name{font-family:'Cormorant Garamond',serif;font-size:14.5pt;font-weight:500;color:#2C2825;line-height:1.15;letter-spacing:-0.01em}
+.front-pos{font-size:5.5pt;letter-spacing:0.18em;text-transform:uppercase;color:#6B6560;margin-top:4px;font-weight:400;line-height:1.4}
+.front-co{font-family:'Cormorant Garamond',serif;font-size:8pt;color:#C4A882;font-style:italic;font-weight:300;margin-top:2px}
+
+.front-contacts{display:flex;flex-direction:column;gap:3px}
+.ct{display:flex;align-items:center;gap:5px;font-size:6pt;color:#4A4441;font-weight:300;line-height:1.3}
+.ct svg{width:7px;height:7px;flex-shrink:0}
+
+.front-bottom{display:flex;align-items:flex-end;justify-content:space-between}
+.front-brand{font-family:'Cormorant Garamond',serif;font-size:6.5pt;color:#C4A882;letter-spacing:0.1em}
+.front-brand span{display:block;font-family:'DM Sans',sans-serif;font-size:4.5pt;letter-spacing:0.18em;text-transform:uppercase;color:#9A9390;font-style:normal;margin-top:1px}
+
+/* BACK */
+#cardBack{
+  width:323px;height:204px;
+  background:#2C2825;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 40px rgba(44,40,37,0.25);
+  flex-shrink:0;
+}
+/* Gold top line */
+#cardBack::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#B09060,#C4A882,#D4B896,#C4A882,#B09060)}
+/* Geometric bg pattern */
+#cardBack::after{content:'';position:absolute;bottom:-20px;right:-20px;width:120px;height:120px;border:1px solid rgba(196,168,130,0.12);border-radius:50%}
+
+.back-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:18px 20px 18px 24px}
+
+.back-left{display:flex;flex-direction:column;justify-content:center;gap:0}
+.back-brand{font-family:'Cormorant Garamond',serif;font-size:16pt;font-weight:400;color:#F0EBE4;letter-spacing:0.04em;line-height:1.1}
+.back-brand em{color:#C4A882;font-style:italic}
+.back-tagline{font-size:5.2pt;letter-spacing:0.22em;text-transform:uppercase;color:rgba(240,235,228,0.4);margin-top:6px;font-weight:300;line-height:1.5;max-width:130px}
+.back-divider{width:28px;height:1px;background:#C4A882;margin:8px 0;opacity:0.6}
+.back-social{display:flex;flex-direction:column;gap:2.5px}
+.sc{font-size:5.5pt;color:rgba(240,235,228,0.55);font-weight:300;letter-spacing:0.04em;line-height:1.4}
+
+.back-right{display:flex;flex-direction:column;align-items:center;gap:7px}
+.back-qr{background:#F7F3EE;padding:7px;border-radius:2px}
+.back-qr img{width:72px;height:72px;display:block}
+.back-qr-label{font-size:4.5pt;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,235,228,0.35);text-align:center;font-weight:300}
+
+/* Corner circles decoration */
+.corner-tl{position:absolute;top:-18px;left:-18px;width:60px;height:60px;border:1px solid rgba(196,168,130,0.08);border-radius:50%}
+.corner-br{position:absolute;bottom:-24px;left:24px;width:80px;height:80px;border:1px solid rgba(196,168,130,0.06);border-radius:50%}
+
+/* PRINT */
+@media print{
+  body{background:white;padding:10mm}
+  .toolbar{display:none}
+  .side-label{color:#999}
+  .card-pair{gap:10mm;page-break-inside:avoid}
+  #cardFront,#cardBack{box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="tbtn tbtn-primary" onclick="savePNG()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Simpan sebagai PNG
+  </button>
+  <button class="tbtn tbtn-secondary" onclick="window.print()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Print
+  </button>
+</div>
+
+<div class="card-scene">
+  <div class="card-pair">
+    <!-- FRONT -->
+    <div>
+      <div class="side-label">Depan</div>
+      <div id="cardFront">
+        <div class="front-inner">
+          <div class="front-top">
+            <div class="front-avatar">${avatarHTML}</div>
+            <div class="front-text">
+              <div class="front-name">${name}</div>
+              <div class="front-pos">${pos}</div>
+              <div class="front-co">${co}</div>
+            </div>
+          </div>
+          <div class="front-contacts">${contactLines}</div>
+          <div class="front-bottom">
+            <div class="front-brand">Kawan Baik Bali<span>Hospitality Supplier Premium</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACK -->
+    <div>
+      <div class="side-label">Belakang</div>
+      <div id="cardBack">
+        <div class="corner-tl"></div>
+        <div class="corner-br"></div>
+        <div class="back-inner">
+          <div class="back-left">
+            <div class="back-brand">Kawan<br><em>Baik Bali</em></div>
+            <div class="back-tagline">Hospitality Supplier Premium · Bali</div>
+            <div class="back-divider"></div>
+            <div class="back-social">${socialLines}</div>
+          </div>
+          <div class="back-right">
+            <div class="back-qr">
+              ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR">` : '<div style="width:72px;height:72px;background:#eee"></div>'}
+            </div>
+            <div class="back-qr-label">Scan untuk profil</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-<div class="logo">Kawan Baik Bali<span>Hospitality Supplier</span></div>
-</div>
-<script>window.onload=()=>{window.print();window.onafterprint=()=>window.close()}<\/script>
-</body></html>`);
-  printWin.document.close();
+
+<script>
+async function savePNG() {
+  const btn = document.querySelector('.tbtn-primary');
+  btn.textContent = 'Menyimpan...';
+  btn.disabled = true;
+
+  try {
+    // Scale 3x for print quality
+    const scale = 3;
+
+    const frontEl = document.getElementById('cardFront');
+    const backEl  = document.getElementById('cardBack');
+
+    const [frontCanvas, backCanvas] = await Promise.all([
+      html2canvas(frontEl, { scale, useCORS: true, backgroundColor: null, logging: false }),
+      html2canvas(backEl,  { scale, useCORS: true, backgroundColor: null, logging: false }),
+    ]);
+
+    // Combine into one tall canvas
+    const combined = document.createElement('canvas');
+    const gap = 20 * scale;
+    combined.width  = Math.max(frontCanvas.width, backCanvas.width);
+    combined.height = frontCanvas.height + gap + backCanvas.height;
+    const ctx = combined.getContext('2d');
+    ctx.fillStyle = '#D4CEC8';
+    ctx.fillRect(0, 0, combined.width, combined.height);
+    ctx.drawImage(frontCanvas, 0, 0);
+    ctx.drawImage(backCanvas,  0, frontCanvas.height + gap);
+
+    const link = document.createElement('a');
+    link.download = '${name.replace(/\s+/g,'_')}_KartuNama_KawanBaikBali.png';
+    link.href = combined.toDataURL('image/png');
+    link.click();
+  } catch(e) {
+    alert('Gagal simpan: ' + e.message);
+  } finally {
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Simpan sebagai PNG';
+    btn.disabled = false;
+  }
+}
+<\/script>
+</body>
+</html>`);
+  win.document.close();
 }
 
 // ── Edit card
