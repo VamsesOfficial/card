@@ -425,13 +425,13 @@ async function loadCards() {
 function renderCardList(cards) {
   const list = document.getElementById('cardList');
   const empty = document.getElementById('emptyState');
+  if (!list) return;
   if (!cards.length) {
     list.innerHTML = '';
-    list.appendChild(empty);
-    empty.style.display = 'block';
+    if (empty) { list.appendChild(empty); empty.style.display = 'block'; }
     return;
   }
-  empty.style.display = 'none';
+  if (empty) empty.style.display = 'none';
   list.innerHTML = '';
   cards.forEach(card => {
     const div = document.createElement('div');
@@ -746,9 +746,13 @@ body{background:#D4CEC8;font-family:'DM Sans',sans-serif;min-height:100vh;displa
 <body>
 
 <div class="toolbar">
-  <button class="tbtn tbtn-primary" onclick="savePNG()">
+  <button class="tbtn tbtn-primary" onclick="saveSide('front')">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Simpan sebagai PNG
+    Simpan Depan (PNG)
+  </button>
+  <button class="tbtn tbtn-primary" onclick="saveSide('back')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Simpan Belakang (PNG)
   </button>
   <button class="tbtn tbtn-secondary" onclick="window.print()">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -805,43 +809,28 @@ body{background:#D4CEC8;font-family:'DM Sans',sans-serif;min-height:100vh;displa
 </div>
 
 <script>
-async function savePNG() {
-  const btn = document.querySelector('.tbtn-primary');
-  btn.textContent = 'Menyimpan...';
-  btn.disabled = true;
+async function saveSide(side) {
+  const btns = document.querySelectorAll('.tbtn-primary');
+  btns.forEach(b => { b.disabled = true; });
+  const activeBtn = side === 'front' ? btns[0] : btns[1];
+  const origText = activeBtn.innerHTML;
+  activeBtn.innerHTML = 'Menyimpan...';
 
   try {
-    // Scale 3x for print quality
     const scale = 3;
-
-    const frontEl = document.getElementById('cardFront');
-    const backEl  = document.getElementById('cardBack');
-
-    const [frontCanvas, backCanvas] = await Promise.all([
-      html2canvas(frontEl, { scale, useCORS: true, backgroundColor: null, logging: false }),
-      html2canvas(backEl,  { scale, useCORS: true, backgroundColor: null, logging: false }),
-    ]);
-
-    // Combine into one tall canvas
-    const combined = document.createElement('canvas');
-    const gap = 20 * scale;
-    combined.width  = Math.max(frontCanvas.width, backCanvas.width);
-    combined.height = frontCanvas.height + gap + backCanvas.height;
-    const ctx = combined.getContext('2d');
-    ctx.fillStyle = '#D4CEC8';
-    ctx.fillRect(0, 0, combined.width, combined.height);
-    ctx.drawImage(frontCanvas, 0, 0);
-    ctx.drawImage(backCanvas,  0, frontCanvas.height + gap);
+    const el = document.getElementById(side === 'front' ? 'cardFront' : 'cardBack');
+    const canvas = await html2canvas(el, { scale, useCORS: true, backgroundColor: null, logging: false });
 
     const link = document.createElement('a');
-    link.download = '${name.replace(/\s+/g,'_')}_KartuNama_KawanBaikBali.png';
-    link.href = combined.toDataURL('image/png');
+    const suffix = side === 'front' ? 'Depan' : 'Belakang';
+    link.download = '${name.replace(/\s+/g,'_')}_KartuNama_${co.replace(/\s+/g,'_')}_' + suffix + '.png';
+    link.href = canvas.toDataURL('image/png');
     link.click();
   } catch(e) {
     alert('Gagal simpan: ' + e.message);
   } finally {
-    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Simpan sebagai PNG';
-    btn.disabled = false;
+    btns.forEach(b => { b.disabled = false; });
+    activeBtn.innerHTML = origText;
   }
 }
 <\/script>
