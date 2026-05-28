@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kawan Baik Bali — Digital Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --w:#F7F3EE;--b:#EDE8E0;--c:#2C2825;--cs:#4A4441;
+  --a:#C4A882;--br:rgba(44,40,37,0.12);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --w:#1A1816;--b:#242220;--c:#F0EBE4;--cs:#B8AFA6;
+  --br:rgba(240,235,228,0.1);
+}}
+body{background:var(--w);color:var(--c);font-family:var(--sans);font-weight:300;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center}
+.logo{font-family:var(--serif);font-size:2rem;font-weight:400;letter-spacing:0.04em;margin-bottom:8px}
+.logo span{color:var(--a)}
+.tagline{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--cs);margin-bottom:48px}
+.rule{width:40px;height:1px;background:var(--a);margin:0 auto 48px}
+.desc{font-family:var(--serif);font-size:1.3rem;font-weight:300;font-style:italic;color:var(--cs);max-width:320px;line-height:1.6;margin-bottom:12px}
+.sub{font-size:0.78rem;color:var(--cs);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="logo">Kawan Baik <span>Bali</span></div>
+<div class="tagline">Hospitality Supplier Premium</div>
+<div class="rule"></div>
+<div class="desc">Scan QR code pada kartu nama untuk membuka profil digital.</div>
+<div class="sub">card.kawanbaikbali.com</div>
+</body>
+</html>

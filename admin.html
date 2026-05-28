@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Kawan Baik Bali Card Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --w:#F7F3EE;--b:#EDE8E0;--bm:#E3DDD4;
+  --c:#2C2825;--cs:#4A4441;
+  --a:#C4A882;--al:#D9C4A8;--ad:#A88B65;
+  --br:rgba(44,40,37,0.12);--brs:rgba(44,40,37,0.22);
+  --sh:0 2px 24px rgba(44,40,37,0.08);
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --r:2px;--t:0.2s ease;
+}
+@media(prefers-color-scheme:dark){:root{
+  --w:#1E1C1A;--b:#252220;--bm:#2E2B28;
+  --c:#F0EBE4;--cs:#C8BFB5;
+  --br:rgba(240,235,228,0.1);--brs:rgba(240,235,228,0.18);
+  --sh:0 2px 24px rgba(0,0,0,0.3);
+}}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--w);color:var(--c);font-family:var(--sans);font-weight:300;line-height:1.6;min-height:100vh}
+
+.header{border-bottom:1px solid var(--br);padding:24px 40px;display:flex;align-items:baseline;gap:16px}
+.header-brand{font-family:var(--serif);font-size:1.4rem;font-weight:500;letter-spacing:0.02em}
+.header-brand span{color:var(--a)}
+.header-sub{font-size:0.68rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--cs)}
+
+.wrap{max-width:960px;margin:0 auto;padding:48px 24px 80px;animation:fadeUp 0.5s ease both}
+
+.page-title{font-family:var(--serif);font-size:2.2rem;font-weight:300;line-height:1.2;margin-bottom:6px}
+.page-desc{font-size:0.82rem;color:var(--cs);letter-spacing:0.04em;margin-bottom:40px}
+.accent-rule{width:36px;height:1px;background:var(--a);margin-bottom:36px}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--br);margin-bottom:40px}
+.tab-btn{padding:10px 24px;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--sans);font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--cs);cursor:pointer;transition:all var(--t);margin-bottom:-1px;font-weight:400}
+.tab-btn.active{color:var(--c);border-bottom-color:var(--a)}
+.tab-btn:hover{color:var(--c)}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp 0.3s ease}
+
+/* CARD LIST */
+.card-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px}
+.card-item{border:1px solid var(--br);border-radius:var(--r);padding:20px;display:flex;gap:16px;align-items:center;background:var(--b);transition:border-color var(--t)}
+.card-item:hover{border-color:var(--a)}
+.card-item-avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bm);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.2rem;color:var(--a)}
+.card-item-avatar img{width:100%;height:100%;object-fit:cover}
+.card-item-info{flex:1;min-width:0}
+.card-item-name{font-family:var(--serif);font-size:1rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-item-pos{font-size:0.72rem;color:var(--cs);letter-spacing:0.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-item-slug{font-size:0.65rem;color:var(--a);font-family:monospace;margin-top:4px}
+.card-item-actions{display:flex;gap:8px;flex-shrink:0}
+.icon-btn{width:32px;height:32px;border:1px solid var(--br);background:none;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--cs);transition:all var(--t)}
+.icon-btn:hover{border-color:var(--a);color:var(--a)}
+.icon-btn.danger:hover{border-color:#c0392b;color:#c0392b}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--cs)}
+.empty-state svg{opacity:0.25;margin-bottom:12px}
+.empty-title{font-family:var(--serif);font-size:1.3rem;font-weight:300;margin-bottom:6px;color:var(--c)}
+.empty-desc{font-size:0.8rem;letter-spacing:0.04em}
+
+/* FORM SECTION */
+.section{margin-bottom:44px}
+.section-label{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--a);font-weight:500;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--br)}
+
+.photo-row{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.photo-circle{width:110px;height:110px;border-radius:50%;border:1px solid var(--brs);overflow:hidden;flex-shrink:0;background:var(--b);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color var(--t)}
+.photo-circle:hover{border-color:var(--a)}
+.photo-circle img{width:100%;height:100%;object-fit:cover;display:none}
+.photo-ph{text-align:center}
+.photo-ph svg{opacity:0.3;margin-bottom:6px}
+.photo-ph span{display:block;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--cs)}
+.photo-info{flex:1;min-width:180px;padding-top:6px}
+.photo-info h4{font-family:var(--serif);font-size:1.05rem;font-weight:400;margin-bottom:6px}
+.photo-info p{font-size:0.78rem;color:var(--cs);margin-bottom:14px;line-height:1.5}
+#photoInput{display:none}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.form-grid .s2{grid-column:span 2}
+@media(max-width:580px){.form-grid{grid-template-columns:1fr}.form-grid .s2{grid-column:span 1}}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:0.67rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cs);font-weight:400}
+.field input,.field textarea{background:var(--b);border:1px solid var(--br);border-radius:var(--r);padding:11px 13px;font-family:var(--sans);font-size:0.88rem;font-weight:300;color:var(--c);outline:none;transition:border-color var(--t),background var(--t);width:100%}
+.field input::placeholder,.field textarea::placeholder{color:rgba(44,40,37,0.3)}
+@media(prefers-color-scheme:dark){.field input::placeholder,.field textarea::placeholder{color:rgba(240,235,228,0.22)}}
+.field input:focus,.field textarea:focus{border-color:var(--a);background:var(--w)}
+.field textarea{resize:vertical;min-height:76px;line-height:1.5}
+
+.social-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:580px){.social-grid{grid-template-columns:1fr}}
+.sfield{display:flex;flex-direction:column;gap:6px}
+.sfield label{font-size:0.67rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cs)}
+.sinput{display:flex;align-items:center;border:1px solid var(--br);border-radius:var(--r);background:var(--b);overflow:hidden;transition:border-color var(--t)}
+.sinput:focus-within{border-color:var(--a)}
+.sprefix{padding:0 10px;font-size:0.76rem;color:var(--cs);background:var(--bm);height:42px;display:flex;align-items:center;border-right:1px solid var(--br);white-space:nowrap}
+.sinput input{flex:1;border:none;background:transparent;padding:11px 11px;font-family:var(--sans);font-size:0.87rem;color:var(--c);outline:none;min-width:0;font-weight:300}
+
+/* QR */
+.qr-wrap{background:var(--b);border:1px solid var(--br);border-radius:var(--r);padding:32px;display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap}
+.qr-box{flex-shrink:0;background:#fff;padding:14px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;min-width:148px;min-height:148px}
+.qr-info{flex:1;min-width:180px}
+.qr-info h4{font-family:var(--serif);font-size:1.2rem;font-weight:400;margin-bottom:8px}
+.qr-info p{font-size:0.8rem;color:var(--cs);line-height:1.6;margin-bottom:14px}
+.qr-url{font-size:0.73rem;color:var(--a);font-family:monospace;background:var(--w);padding:8px 12px;border-radius:var(--r);border:1px solid var(--br);word-break:break-all;margin-bottom:14px;display:none}
+.qr-empty{text-align:center;color:var(--cs)}
+.qr-empty svg{opacity:0.25;margin-bottom:8px}
+.qr-empty span{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;display:block}
+
+/* PRINT PREVIEW */
+.print-preview-wrap{margin-top:20px;display:none}
+.print-preview-label{font-size:0.65rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--cs);margin-bottom:12px}
+.print-card{width:85.6mm;height:54mm;border:1px solid var(--brs);border-radius:3px;background:#F7F3EE;padding:8mm 7mm;display:flex;gap:6mm;align-items:center;position:relative;overflow:hidden;box-shadow:var(--sh)}
+.print-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3mm;background:#C4A882}
+.pc-avatar{width:16mm;height:16mm;border-radius:50%;overflow:hidden;flex-shrink:0;background:#EDE8E0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.2rem;color:#C4A882}
+.pc-avatar img{width:100%;height:100%;object-fit:cover}
+.pc-info{flex:1;min-width:0}
+.pc-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:11pt;font-weight:500;color:#2C2825;line-height:1.2;margin-bottom:1.5mm}
+.pc-pos{font-size:6.5pt;letter-spacing:0.12em;text-transform:uppercase;color:#4A4441;margin-bottom:1mm;font-family:'DM Sans',sans-serif}
+.pc-co{font-family:'Cormorant Garamond',Georgia,serif;font-size:7.5pt;color:#C4A882;font-style:italic;margin-bottom:2.5mm}
+.pc-contacts{display:flex;flex-direction:column;gap:0.8mm}
+.pc-contact{font-size:6pt;color:#4A4441;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:1.5mm}
+.pc-logo{position:absolute;bottom:4mm;right:5mm;font-family:'Cormorant Garamond',Georgia,serif;font-size:6.5pt;color:#C4A882;letter-spacing:0.08em}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
+.btn-p{display:inline-flex;align-items:center;gap:9px;padding:13px 28px;background:var(--c);color:var(--w);border:1px solid var(--c);font-family:var(--sans);font-size:0.76rem;letter-spacing:0.13em;text-transform:uppercase;cursor:pointer;transition:all var(--t);border-radius:var(--r);font-weight:400}
+.btn-p:hover{background:var(--a);border-color:var(--a);color:var(--c)}
+.btn-s{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;background:transparent;color:var(--c);border:1px solid var(--brs);font-family:var(--sans);font-size:0.76rem;letter-spacing:0.13em;text-transform:uppercase;cursor:pointer;transition:all var(--t);border-radius:var(--r);font-weight:400}
+.btn-s:hover{border-color:var(--a);color:var(--a)}
+.btn-s:disabled{opacity:0.3;cursor:not-allowed}
+.btn-danger{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;background:transparent;color:#c0392b;border:1px solid rgba(192,57,43,0.3);font-family:var(--sans);font-size:0.76rem;letter-spacing:0.13em;text-transform:uppercase;cursor:pointer;transition:all var(--t);border-radius:var(--r);font-weight:400}
+.btn-danger:hover{background:#c0392b;color:#fff;border-color:#c0392b}
+
+.divider{height:1px;background:var(--br);margin:40px 0}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(44,40,37,0.5);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity var(--t);padding:20px}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--w);border:1px solid var(--br);border-radius:var(--r);padding:32px;max-width:400px;width:100%;transform:translateY(12px);transition:transform var(--t)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal h3{font-family:var(--serif);font-size:1.4rem;font-weight:400;margin-bottom:8px}
+.modal p{font-size:0.82rem;color:var(--cs);line-height:1.6;margin-bottom:24px}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--c);color:var(--w);padding:11px 22px;font-size:0.78rem;letter-spacing:0.06em;border-radius:var(--r);opacity:0;transform:translateY(8px);transition:all 0.25s ease;pointer-events:none;z-index:999;font-family:var(--sans)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{background:#2d6a4f}
+.toast.error{background:#c0392b}
+
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* SLUG FIELD */
+.slug-row{display:flex;align-items:center;gap:0;border:1px solid var(--br);border-radius:var(--r);background:var(--b);overflow:hidden;transition:border-color var(--t)}
+.slug-row:focus-within{border-color:var(--a)}
+.slug-prefix{padding:0 10px;font-size:0.78rem;color:var(--cs);background:var(--bm);height:42px;display:flex;align-items:center;border-right:1px solid var(--br);white-space:nowrap;font-family:monospace}
+.slug-row input{flex:1;border:none;background:transparent;padding:11px 12px;font-family:monospace;font-size:0.87rem;color:var(--c);outline:none;min-width:0}
+
+.loading-overlay{position:fixed;inset:0;background:var(--w);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:100;transition:opacity 0.4s ease}
+.loading-overlay.gone{opacity:0;pointer-events:none}
+.loading-brand{font-family:var(--serif);font-size:1.4rem;color:var(--a)}
+.loading-line{width:40px;height:1px;background:var(--br);position:relative;overflow:hidden}
+.loading-line::after{content:'';position:absolute;inset:0;background:var(--a);animation:loadSlide 0.9s ease infinite}
+@keyframes loadSlide{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-brand">Kawan Baik Bali</div>
+  <div class="loading-line"></div>
+</div>
+
+<header class="header">
+  <div class="header-brand">Kawan Baik <span>Bali</span></div>
+  <div class="header-sub">Admin · Card Generator</div>
+</header>
+
+<div class="wrap">
+  <h1 class="page-title">Digital Business<br>Card Manager</h1>
+  <p class="page-desc">Kelola semua kartu digital karyawan Kawan Baik Bali</p>
+  <div class="accent-rule"></div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('list')">Semua Card</button>
+    <button class="tab-btn" onclick="switchTab('create')" id="tabCreate">Buat Card Baru</button>
+  </div>
+
+  <!-- LIST TAB -->
+  <div class="tab-panel active" id="panelList">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+      <button class="btn-p" onclick="switchTab('create');resetForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Buat Card Baru
+      </button>
+    </div>
+    <div class="card-list" id="cardList">
+      <div class="empty-state" id="emptyState">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <div class="empty-title">Belum ada card</div>
+        <div class="empty-desc">Buat card pertama untuk mulai</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE/EDIT TAB -->
+  <div class="tab-panel" id="panelCreate">
+    <input type="hidden" id="editId">
+
+    <!-- FOTO -->
+    <div class="section">
+      <div class="section-label">Foto Profil</div>
+      <div class="photo-row">
+        <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">
+          <img id="photoPreview" src="" alt="">
+          <div class="photo-ph" id="photoPH">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <span>Klik upload</span>
+          </div>
+        </div>
+        <div class="photo-info">
+          <h4>Foto Profil</h4>
+          <p>JPG atau PNG, rasio 1:1, maks 1MB.</p>
+          <button class="btn-s" onclick="document.getElementById('photoInput').click()">Pilih Foto</button>
+        </div>
+        <input type="file" id="photoInput" accept="image/*">
+      </div>
+    </div>
+
+    <!-- SLUG -->
+    <div class="section">
+      <div class="section-label">URL Card</div>
+      <div class="field">
+        <label>Slug (URL unik) *</label>
+        <div class="slug-row">
+          <span class="slug-prefix">card.kawanbaikbali.com/</span>
+          <input type="text" id="slug" placeholder="nama-karyawan" oninput="autoSlug(false)">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- INFO -->
+    <div class="section">
+      <div class="section-label">Informasi Pribadi</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nama Lengkap *</label>
+          <input type="text" id="name" placeholder="Dewi Saraswati" oninput="autoSlug(true)">
+        </div>
+        <div class="field">
+          <label>Jabatan *</label>
+          <input type="text" id="position" placeholder="Senior Account Manager">
+        </div>
+        <div class="field">
+          <label>Perusahaan</label>
+          <input type="text" id="company" value="Kawan Baik Bali">
+        </div>
+        <div class="field">
+          <label>Nomor HP</label>
+          <input type="tel" id="phone" placeholder="+62 812 3456 7890">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="nama@kawanbaikbali.com">
+        </div>
+        <div class="field">
+          <label>Website</label>
+          <input type="url" id="website" placeholder="https://kawanbaikbali.com">
+        </div>
+        <div class="field s2">
+          <label>Tagline / Deskripsi</label>
+          <textarea id="tagline" placeholder="Mendukung operasional hospitality premium di seluruh Bali."></textarea>
+        </div>
+        <div class="field s2">
+          <label>Alamat</label>
+          <input type="text" id="address" placeholder="Jl. Sunset Road No. 88, Seminyak, Bali">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- SOCIAL -->
+    <div class="section">
+      <div class="section-label">Social Media</div>
+      <div class="social-grid">
+        <div class="sfield">
+          <label>Instagram</label>
+          <div class="sinput"><span class="sprefix">@</span><input type="text" id="instagram" placeholder="username"></div>
+        </div>
+        <div class="sfield">
+          <label>LinkedIn</label>
+          <div class="sinput"><span class="sprefix">in/</span><input type="text" id="linkedin" placeholder="profile"></div>
+        </div>
+        <div class="sfield">
+          <label>WhatsApp</label>
+          <div class="sinput"><span class="sprefix">+62</span><input type="text" id="whatsapp" placeholder="812 3456 7890"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- QR -->
+    <div class="section">
+      <div class="section-label">QR Code & Print Preview</div>
+      <div class="qr-wrap">
+        <div class="qr-box"><div id="qrcode"><div class="qr-empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></svg><span>Simpan dulu</span></div></div></div>
+        <div class="qr-info">
+          <h4>QR Code Kartu</h4>
+          <p>Setelah simpan, QR akan mengarah ke halaman card publik. Bisa di-print atau dibagikan digital.</p>
+          <div class="qr-url" id="qrUrl"></div>
+          <p style="font-size:0.73rem;color:var(--cs)">QR muncul otomatis setelah card tersimpan.</p>
+        </div>
+      </div>
+
+      <div class="print-preview-wrap" id="printPreviewWrap">
+        <div class="print-preview-label">Preview Kartu Nama (85×54mm)</div>
+        <div class="print-card" id="printCard">
+          <div class="pc-avatar" id="pcAvatar"></div>
+          <div class="pc-info">
+            <div class="pc-name" id="pcName">—</div>
+            <div class="pc-pos" id="pcPos"></div>
+            <div class="pc-co" id="pcCo">Kawan Baik Bali</div>
+            <div class="pc-contacts" id="pcContacts"></div>
+          </div>
+          <div class="pc-logo">Kawan Baik Bali</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-p" onclick="saveCard()" id="saveBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Simpan Card
+      </button>
+      <button class="btn-s" onclick="printCard()" id="printBtn" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Kartu
+      </button>
+      <button class="btn-s" onclick="cancelEdit()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Hapus Card?</h3>
+    <p>Card <strong id="deleteCardName"></strong> akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.</p>
+    <div class="modal-btns">
+      <button class="btn-s" onclick="closeModal()">Batal</button>
+      <button class="btn-danger" onclick="confirmDelete()">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- PRINT STYLES -->
+<style id="printStyles"></style>
+
+<script>
+const SUPA_URL = 'https://uyjkarfzkngamepxvpvd.supabase.co';
+const SUPA_KEY = 'sb_publishable_nWlelzglezZOa6rU5fXqBw_V93XVlCY';
+const CARD_BASE = 'https://card.kawanbaikbali.com/';
+
+let photoBase64 = '';
+let allCards = [];
+let deleteTargetId = null;
+let slugManuallyEdited = false;
+
+// ── API helpers
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SUPA_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || 'return=representation',
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || err.details || 'Supabase error');
+  }
+  return res.json().catch(() => null);
+}
+
+// ── Init
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadCards();
+  document.getElementById('loadingOverlay').classList.add('gone');
+});
+
+// ── Load all cards
+async function loadCards() {
+  try {
+    const data = await sbFetch('cards?select=*&order=created_at.desc');
+    allCards = data || [];
+    renderCardList(allCards);
+  } catch(e) {
+    showToast('Gagal memuat data: ' + e.message, 'error');
+  }
+}
+
+function renderCardList(cards) {
+  const list = document.getElementById('cardList');
+  const empty = document.getElementById('emptyState');
+  if (!cards.length) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = '';
+  cards.forEach(card => {
+    const div = document.createElement('div');
+    div.className = 'card-item';
+    const initials = (card.name || 'K').charAt(0).toUpperCase();
+    div.innerHTML = `
+      <div class="card-item-avatar">${card.photo ? `<img src="${card.photo}" alt="">` : initials}</div>
+      <div class="card-item-info">
+        <div class="card-item-name">${esc(card.name || '—')}</div>
+        <div class="card-item-pos">${esc(card.position || '')}${card.position && card.company ? ' · ' : ''}${esc(card.company || '')}</div>
+        <div class="card-item-slug">${CARD_BASE}${esc(card.slug)}</div>
+      </div>
+      <div class="card-item-actions">
+        <button class="icon-btn" title="Edit" onclick="editCard('${card.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="icon-btn danger" title="Hapus" onclick="askDelete('${card.id}','${esc(card.name || '')}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+// ── Tab switch
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='list')||(i===1&&tab==='create')));
+  document.getElementById('panelList').classList.toggle('active', tab === 'list');
+  document.getElementById('panelCreate').classList.toggle('active', tab === 'create');
+}
+
+// ── Photo upload
+document.getElementById('photoInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 1.5 * 1024 * 1024) { showToast('Foto maksimum 1.5MB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    // Compress
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const max = 400;
+      let w = img.width, h = img.height;
+      if (w > max || h > max) {
+        if (w > h) { h = h * max / w; w = max; }
+        else { w = w * max / h; h = max; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      photoBase64 = canvas.toDataURL('image/jpeg', 0.82);
+      const preview = document.getElementById('photoPreview');
+      preview.src = photoBase64;
+      preview.style.display = 'block';
+      document.getElementById('photoPH').style.display = 'none';
+      updatePrintPreview();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// ── Auto slug from name
+function autoSlug(fromName) {
+  if (fromName && slugManuallyEdited) return;
+  if (fromName) {
+    const name = document.getElementById('name').value;
+    document.getElementById('slug').value = toSlug(name);
+  } else {
+    slugManuallyEdited = true;
+  }
+  updatePrintPreview();
+}
+
+function toSlug(str) {
+  return str.toLowerCase()
+    .replace(/[àáâãäå]/g,'a').replace(/[èéêë]/g,'e').replace(/[ìíîï]/g,'i')
+    .replace(/[òóôõö]/g,'o').replace(/[ùúûü]/g,'u').replace(/[ñ]/g,'n')
+    .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+}
+
+// ── Print preview update
+function updatePrintPreview() {
+  const name = document.getElementById('name').value;
+  const pos  = document.getElementById('position').value;
+  const co   = document.getElementById('company').value || 'Kawan Baik Bali';
+  const ph   = document.getElementById('phone').value;
+  const em   = document.getElementById('email').value;
+  document.getElementById('pcName').textContent = name || '—';
+  document.getElementById('pcPos').textContent = pos;
+  document.getElementById('pcCo').textContent = co;
+  const av = document.getElementById('pcAvatar');
+  av.innerHTML = photoBase64 ? `<img src="${photoBase64}" style="width:100%;height:100%;object-fit:cover">` : (name||'K').charAt(0).toUpperCase();
+  const contacts = document.getElementById('pcContacts');
+  contacts.innerHTML = [
+    ph ? `<div class="pc-contact"><span>✆</span>${esc(ph)}</div>` : '',
+    em ? `<div class="pc-contact"><span>✉</span>${esc(em)}</div>` : '',
+  ].join('');
+}
+
+['name','position','company','phone','email'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePrintPreview);
+});
+
+// ── Save card
+async function saveCard() {
+  const id = document.getElementById('editId').value;
+  const slug = document.getElementById('slug').value.trim();
+  const name = document.getElementById('name').value.trim();
+  if (!name) { showToast('Nama wajib diisi', 'error'); return; }
+  if (!slug) { showToast('Slug wajib diisi', 'error'); return; }
+  if (!/^[a-z0-9-]+$/.test(slug)) { showToast('Slug hanya huruf kecil, angka, dan strip', 'error'); return; }
+
+  const payload = {
+    slug, name,
+    position: document.getElementById('position').value.trim(),
+    company: document.getElementById('company').value.trim() || 'Kawan Baik Bali',
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    website: document.getElementById('website').value.trim(),
+    tagline: document.getElementById('tagline').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    instagram: document.getElementById('instagram').value.trim(),
+    linkedin: document.getElementById('linkedin').value.trim(),
+    whatsapp: document.getElementById('whatsapp').value.trim(),
+    photo: photoBase64 || null
+  };
+
+  const btn = document.getElementById('saveBtn');
+  btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
+  btn.disabled = true;
+
+  try {
+    if (id) {
+      await sbFetch(`cards?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+      showToast('Card berhasil diperbarui ✓', 'success');
+    } else {
+      await sbFetch('cards', { method: 'POST', body: JSON.stringify(payload) });
+      showToast('Card berhasil disimpan ✓', 'success');
+    }
+    await loadCards();
+    generateQR(slug);
+    document.getElementById('printBtn').disabled = false;
+    document.getElementById('printPreviewWrap').style.display = 'block';
+  } catch(e) {
+    showToast('Gagal: ' + e.message, 'error');
+  } finally {
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Simpan Card';
+    btn.disabled = false;
+  }
+}
+
+// ── QR
+function generateQR(slug) {
+  const url = CARD_BASE + slug;
+  const qrEl = document.getElementById('qrcode');
+  qrEl.innerHTML = '';
+  new QRCode(qrEl, { text: url, width: 128, height: 128, colorDark: '#2C2825', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+  document.getElementById('qrUrl').textContent = url;
+  document.getElementById('qrUrl').style.display = 'block';
+}
+
+// ── Print
+function printCard() {
+  const name = document.getElementById('name').value || 'Karyawan';
+  const pos  = document.getElementById('position').value || '';
+  const co   = document.getElementById('company').value || 'Kawan Baik Bali';
+  const ph   = document.getElementById('phone').value || '';
+  const em   = document.getElementById('email').value || '';
+  const web  = document.getElementById('website').value || '';
+  const slug = document.getElementById('slug').value || '';
+  const cardUrl = CARD_BASE + slug;
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,300&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@page{size:85.6mm 54mm;margin:0}
+body{width:85.6mm;height:54mm;overflow:hidden;background:#F7F3EE;font-family:'DM Sans',sans-serif;display:flex;align-items:center}
+.card{width:85.6mm;height:54mm;padding:7mm 7mm 7mm 10mm;display:flex;gap:5mm;align-items:center;position:relative;background:#F7F3EE}
+.stripe{position:absolute;left:0;top:0;bottom:0;width:3mm;background:#C4A882}
+.avatar{width:15mm;height:15mm;border-radius:50%;overflow:hidden;flex-shrink:0;background:#EDE8E0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:12pt;color:#C4A882;border:0.5pt solid rgba(44,40,37,0.2)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.info{flex:1}
+.name{font-family:'Cormorant Garamond',serif;font-size:10.5pt;font-weight:500;color:#2C2825;line-height:1.2;margin-bottom:1mm}
+.pos{font-size:5.8pt;letter-spacing:0.12em;text-transform:uppercase;color:#4A4441;margin-bottom:0.8mm;font-weight:400}
+.co{font-family:'Cormorant Garamond',serif;font-size:7pt;color:#C4A882;font-style:italic;margin-bottom:2.5mm}
+.contacts{display:flex;flex-direction:column;gap:0.7mm}
+.ct{font-size:5.8pt;color:#4A4441;display:flex;align-items:center;gap:1.5mm}
+.logo{position:absolute;bottom:3.5mm;right:4mm;font-family:'Cormorant Garamond',serif;font-size:6pt;color:#C4A882;letter-spacing:0.08em;text-align:right}
+.logo span{display:block;font-size:4.5pt;letter-spacing:0.12em;text-transform:uppercase;color:#888;font-family:'DM Sans',sans-serif;font-style:normal}
+</style></head><body>
+<div class="card">
+<div class="stripe"></div>
+<div class="avatar">${photoBase64 ? `<img src="${photoBase64}">` : name.charAt(0).toUpperCase()}</div>
+<div class="info">
+  <div class="name">${esc(name)}</div>
+  <div class="pos">${esc(pos)}</div>
+  <div class="co">${esc(co)}</div>
+  <div class="contacts">
+    ${ph ? `<div class="ct"><span>✆</span> ${esc(ph)}</div>` : ''}
+    ${em ? `<div class="ct"><span>✉</span> ${esc(em)}</div>` : ''}
+    ${web ? `<div class="ct"><span>⊕</span> ${esc(web.replace(/^https?:\/\//,''))}</div>` : ''}
+  </div>
+</div>
+<div class="logo">Kawan Baik Bali<span>Hospitality Supplier</span></div>
+</div>
+<script>window.onload=()=>{window.print();window.onafterprint=()=>window.close()}<\/script>
+</body></html>`);
+  printWin.document.close();
+}
+
+// ── Edit card
+function editCard(id) {
+  const card = allCards.find(c => c.id === id);
+  if (!card) return;
+  document.getElementById('editId').value = card.id;
+  document.getElementById('slug').value = card.slug;
+  document.getElementById('name').value = card.name || '';
+  document.getElementById('position').value = card.position || '';
+  document.getElementById('company').value = card.company || 'Kawan Baik Bali';
+  document.getElementById('phone').value = card.phone || '';
+  document.getElementById('email').value = card.email || '';
+  document.getElementById('website').value = card.website || '';
+  document.getElementById('tagline').value = card.tagline || '';
+  document.getElementById('address').value = card.address || '';
+  document.getElementById('instagram').value = card.instagram || '';
+  document.getElementById('linkedin').value = card.linkedin || '';
+  document.getElementById('whatsapp').value = card.whatsapp || '';
+
+  if (card.photo) {
+    photoBase64 = card.photo;
+    const p = document.getElementById('photoPreview');
+    p.src = card.photo; p.style.display = 'block';
+    document.getElementById('photoPH').style.display = 'none';
+  } else {
+    photoBase64 = '';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoPH').style.display = 'block';
+  }
+
+  slugManuallyEdited = true;
+  updatePrintPreview();
+  generateQR(card.slug);
+  document.getElementById('printBtn').disabled = false;
+  document.getElementById('printPreviewWrap').style.display = 'block';
+  switchTab('create');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Delete
+function askDelete(id, name) {
+  deleteTargetId = id;
+  document.getElementById('deleteCardName').textContent = name;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  deleteTargetId = null;
+}
+
+async function confirmDelete() {
+  if (!deleteTargetId) return;
+  try {
+    await sbFetch(`cards?id=eq.${deleteTargetId}`, { method: 'DELETE', prefer: 'return=minimal' });
+    showToast('Card dihapus', 'success');
+    closeModal();
+    await loadCards();
+  } catch(e) {
+    showToast('Gagal hapus: ' + e.message, 'error');
+  }
+}
+
+// ── Reset form
+function resetForm() {
+  document.getElementById('editId').value = '';
+  document.getElementById('slug').value = '';
+  ['name','position','phone','email','website','tagline','address','instagram','linkedin','whatsapp'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('company').value = 'Kawan Baik Bali';
+  photoBase64 = '';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoPH').style.display = 'block';
+  slugManuallyEdited = false;
+  document.getElementById('qrcode').innerHTML = '<div class="qr-empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg><span>Simpan dulu</span></div>';
+  document.getElementById('qrUrl').style.display = 'none';
+  document.getElementById('printBtn').disabled = true;
+  document.getElementById('printPreviewWrap').style.display = 'none';
+  updatePrintPreview();
+}
+
+function cancelEdit() {
+  resetForm();
+  switchTab('list');
+}
+
+// ── Toast
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
