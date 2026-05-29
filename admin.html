@@ -481,8 +481,13 @@ async function showApp() {
   document.getElementById('loadingOverlay').classList.remove('gone');
   document.getElementById('loadingOverlay').style.opacity = '1';
   document.getElementById('loadingOverlay').style.pointerEvents = 'auto';
-  await loadCards();
-  document.getElementById('loadingOverlay').classList.add('gone');
+  try {
+    await loadCards();
+  } catch(e) {
+    console.error('loadCards error:', e);
+  } finally {
+    document.getElementById('loadingOverlay').classList.add('gone');
+  }
 }
 
 // Enter key on password field
