@@ -423,7 +423,7 @@ const SUPA_KEY = 'sb_publishable_nWlelzglezZOa6rU5fXqBw_V93XVlCY';
 const CARD_BASE = 'https://card.kawanbaikbali.com/';
 
 // Init Supabase client (for auth only)
-const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const sbClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 let photoBase64 = '';
 let allCards = [];
@@ -442,7 +442,7 @@ async function doLogin() {
   btn.disabled = true;
   btn.textContent = 'Memproses...';
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
     if (error) {
       const msg = error.message || '';
       if (msg.includes('Email not confirmed')) {
@@ -466,7 +466,7 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  await supabase.auth.signOut();
+  await sbClient.auth.signOut();
   currentSession = null;
   document.getElementById('authOverlay').classList.remove('gone');
   document.getElementById('logoutBtn').classList.add('gone');
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('authPassword').focus();
   });
   // Check existing session
-  supabase.auth.getSession().then(({ data }) => {
+  sbClient.auth.getSession().then(({ data }) => {
     if (data.session) {
       currentSession = data.session;
       showApp();
