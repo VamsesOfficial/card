@@ -381,6 +381,7 @@ const SUPA_URL = 'https://uyjkarfzkngamepxvpvd.supabase.co';
 const SUPA_KEY = 'sb_publishable_nWlelzglezZOa6rU5fXqBw_V93XVlCY';
 const CARD_BASE = 'https://card.kawanbaikbali.com/';
 
+let photoBase64 = '';
 let allCards = [];
 let deleteTargetId = null;
 let slugManuallyEdited = false;
@@ -1358,7 +1359,14 @@ body{background:var(--w);color:var(--c);font-family:var(--sans);font-weight:300;
 <style id="printStyles"></style>
 
 <script>
+const SUPA_URL = 'https://uyjkarfzkngamepxvpvd.supabase.co';
+const SUPA_KEY = 'sb_publishable_nWlelzglezZOa6rU5fXqBw_V93XVlCY';
+const CARD_BASE = 'https://card.kawanbaikbali.com/';
 
+let photoBase64 = '';
+let allCards = [];
+let deleteTargetId = null;
+let slugManuallyEdited = false;
 
 // ── API helpers
 async function sbFetch(path, opts = {}) {
