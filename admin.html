@@ -478,15 +478,19 @@ async function doLogout() {
 async function showApp() {
   document.getElementById('authOverlay').classList.add('gone');
   document.getElementById('logoutBtn').classList.remove('gone');
-  document.getElementById('loadingOverlay').classList.remove('gone');
-  document.getElementById('loadingOverlay').style.opacity = '1';
-  document.getElementById('loadingOverlay').style.pointerEvents = 'auto';
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.remove('gone');
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'auto';
+  overlay.style.display = 'flex';
   try {
     await loadCards();
   } catch(e) {
     console.error('loadCards error:', e);
   } finally {
-    document.getElementById('loadingOverlay').classList.add('gone');
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    setTimeout(() => { overlay.style.display = 'none'; }, 400);
   }
 }
 
@@ -533,10 +537,8 @@ async function loadCards() {
   try {
     const data = await sbFetch('cards?select=*&order=created_at.desc');
     allCards = data || [];
-    alert('Data loaded: ' + allCards.length + ' cards. Sample: ' + JSON.stringify(allCards[0]));
     renderCardList(allCards);
   } catch(e) {
-    alert('ERROR: ' + e.message);
     showToast('Gagal memuat data: ' + e.message, 'error');
   }
 }
