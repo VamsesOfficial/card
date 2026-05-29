@@ -681,15 +681,16 @@ body{background:#CCCAC6;font-family:'DM Sans',sans-serif;min-height:100vh;displa
   z-index:10;
 }
 
-/* QR top-right */
+/* QR bottom-right on front card */
 .f-qr{
-  position:absolute;top:28px;right:28px;
-  background:#fff;padding:7px;border-radius:3px;
+  position:absolute;bottom:22px;right:28px;
+  background:#fff;padding:7px;border-radius:4px;
   z-index:10;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  box-shadow:0 2px 10px rgba(44,40,37,0.2);
 }
-.f-qr img{width:70px;height:70px;display:block}
-.f-qr-none{width:70px;height:70px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#aaa}
+.f-qr img{width:72px;height:72px;display:block}
+.f-qr-label{font-size:4.5pt;letter-spacing:0.18em;text-transform:uppercase;color:#AAA49F;text-align:center;margin-top:4px;font-weight:400;font-family:'DM Sans',sans-serif}
+.f-qr-none{width:72px;height:72px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:7pt;color:#aaa}
 
 /* Left content */
 .f-left{
@@ -794,8 +795,15 @@ body{background:#CCCAC6;font-family:'DM Sans',sans-serif;min-height:100vh;displa
         <path d="M120,0 C200,80 160,200 180,408" fill="none" stroke="#C4A882" stroke-width="1.5" opacity="0.4"/>
       </svg>
 
-      <!-- Avatar (enlarged, no QR) -->
+      <!-- Avatar (top right, enlarged) -->
       <div class="f-avatar" style="top:36px;right:44px;width:118px;height:118px">${avatarHTML}</div>
+
+      <!-- QR code bottom right -->
+      <div class="f-qr">
+        ${qrDataUrl
+          ? `<img src="${qrDataUrl}" alt="QR"><div class="f-qr-label">Scan</div>`
+          : `<div class="f-qr-none">QR</div>`}
+      </div>
 
       <!-- Left info -->
       <div class="f-left">
