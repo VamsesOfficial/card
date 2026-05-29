@@ -533,8 +533,10 @@ async function loadCards() {
   try {
     const data = await sbFetch('cards?select=*&order=created_at.desc');
     allCards = data || [];
+    alert('Data loaded: ' + allCards.length + ' cards. Sample: ' + JSON.stringify(allCards[0]));
     renderCardList(allCards);
   } catch(e) {
+    alert('ERROR: ' + e.message);
     showToast('Gagal memuat data: ' + e.message, 'error');
   }
 }
