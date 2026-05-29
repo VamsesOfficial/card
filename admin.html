@@ -438,17 +438,31 @@ async function doLogin() {
   const btn = document.getElementById('authBtn');
   const errEl = document.getElementById('authError');
   errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'Isi email dan password dulu.'; return; }
   btn.disabled = true;
   btn.textContent = 'Memproses...';
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    errEl.textContent = 'Email atau password salah.';
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      const msg = error.message || '';
+      if (msg.includes('Email not confirmed')) {
+        errEl.textContent = 'Email belum dikonfirmasi. Cek inbox kamu.';
+      } else if (msg.includes('Invalid login')) {
+        errEl.textContent = 'Email atau password salah.';
+      } else {
+        errEl.textContent = 'Login gagal: ' + msg;
+      }
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+      return;
+    }
+    currentSession = data.session;
+    await showApp();
+  } catch (e) {
+    errEl.textContent = 'Koneksi gagal. Coba lagi.';
     btn.disabled = false;
     btn.textContent = 'Masuk';
-    return;
   }
-  currentSession = data.session;
-  showApp();
 }
 
 async function doLogout() {
@@ -456,13 +470,18 @@ async function doLogout() {
   currentSession = null;
   document.getElementById('authOverlay').classList.remove('gone');
   document.getElementById('logoutBtn').classList.add('gone');
+  document.getElementById('authBtn').disabled = false;
+  document.getElementById('authBtn').textContent = 'Masuk';
   document.getElementById('authPassword').value = '';
 }
 
-function showApp() {
+async function showApp() {
   document.getElementById('authOverlay').classList.add('gone');
   document.getElementById('logoutBtn').classList.remove('gone');
-  loadCards();
+  document.getElementById('loadingOverlay').classList.remove('gone');
+  document.getElementById('loadingOverlay').style.opacity = '1';
+  document.getElementById('loadingOverlay').style.pointerEvents = 'auto';
+  await loadCards();
   document.getElementById('loadingOverlay').classList.add('gone');
 }
 
