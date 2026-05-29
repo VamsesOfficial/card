@@ -407,18 +407,27 @@ async function sbFetch(path, opts = {}) {
 
 // ── Init
 window.addEventListener('DOMContentLoaded', async () => {
-  await loadCards();
-  document.getElementById('loadingOverlay').classList.add('gone');
+  // Hard timeout fallback — force hide loading after 6s no matter what
+  setTimeout(() => {
+    const ol = document.getElementById('loadingOverlay');
+    if (ol && !ol.classList.contains('gone')) ol.classList.add('gone');
+  }, 6000);
+  await loadCards(true);
 });
 
 // ── Load all cards
-async function loadCards() {
+async function loadCards(hideOverlay) {
   try {
     const data = await sbFetch('cards?select=*&order=created_at.desc');
     allCards = data || [];
     renderCardList(allCards);
   } catch(e) {
     showToast('Gagal memuat data: ' + e.message, 'error');
+  } finally {
+    if (hideOverlay) {
+      const ol = document.getElementById('loadingOverlay');
+      if (ol) ol.classList.add('gone');
+    }
   }
 }
 
