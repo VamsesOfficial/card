@@ -474,45 +474,82 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
 .badge-cold{background:var(--bg2);color:var(--label3)}
 .arow-hint{font-size:0.6rem;color:var(--label4);letter-spacing:0.02em}
 
-/* Detail modal content */
+/* Detail sheet */
+.detail-modal-overlay{align-items:flex-end!important}
+@media(min-width:520px){.detail-modal-overlay{align-items:center!important}}
+
+.detail-sheet{
+  width:100%;max-width:520px;
+  background:var(--bg);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  display:flex;flex-direction:column;
+  max-height:92vh;max-height:92dvh;
+  transform:translateY(20px);transition:transform var(--t);
+  overflow:hidden;
+}
+@media(min-width:520px){
+  .detail-sheet{border-radius:var(--r-xl);max-height:85vh}
+}
+.modal-overlay.open .detail-sheet{transform:translateY(0)}
+
+.detail-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 12px;
+  border-bottom:0.5px solid var(--sep2);
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  flex-shrink:0;position:sticky;top:0;z-index:10;
+}
+.detail-close{
+  display:inline-flex;align-items:center;gap:4px;
+  background:none;border:none;color:var(--blue);
+  font-family:var(--font);font-size:0.88rem;font-weight:500;
+  cursor:pointer;padding:4px 8px;border-radius:8px;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity var(--t);min-width:72px;
+}
+.detail-close:active{opacity:0.6}
+.detail-header-title{
+  font-size:0.88rem;font-weight:600;
+  text-align:center;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  padding:0 8px;letter-spacing:-0.01em;
+}
+.detail-body{
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  flex:1;
+}
+.detail-content-inner{padding:8px 16px 40px}
+
+/* Content styles */
 .detail-section-label{
   font-size:0.68rem;font-weight:600;color:var(--label3);
   text-transform:uppercase;letter-spacing:0.08em;
-  margin:18px 0 8px;
+  margin:20px 0 8px;
 }
-.detail-bar-row{
-  display:flex;align-items:center;gap:10px;margin-bottom:7px;
-}
+.detail-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .detail-bar-key{
   font-size:0.78rem;color:var(--label2);
-  min-width:72px;max-width:90px;
+  min-width:68px;max-width:88px;
   flex-shrink:0;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis;
 }
-.detail-bar-track{
-  flex:1;background:var(--bg3);border-radius:100px;
-  height:5px;overflow:hidden;
-}
-.detail-bar-fill{
-  height:100%;background:var(--blue);border-radius:100px;
-  transition:width 0.5s cubic-bezier(.16,1,.3,1);
-}
-.detail-bar-pct{
-  font-size:0.7rem;color:var(--label3);
-  min-width:28px;text-align:right;flex-shrink:0;
-}
+.detail-bar-track{flex:1;background:var(--bg3);border-radius:100px;height:5px;overflow:hidden}
+.detail-bar-fill{height:100%;background:var(--blue);border-radius:100px;transition:width 0.5s cubic-bezier(.16,1,.3,1)}
+.detail-bar-pct{font-size:0.7rem;color:var(--label3);min-width:28px;text-align:right;flex-shrink:0}
 .detail-peak{
-  background:var(--bg2);border:0.5px solid var(--sep);
+  background:var(--bg1);border:0.5px solid var(--sep);
   border-radius:var(--r-md);padding:14px 16px;
   font-size:0.85rem;color:var(--label2);line-height:1.5;
+  display:flex;align-items:flex-start;gap:10px;
 }
 .detail-recent-row{
   display:flex;justify-content:space-between;align-items:flex-start;
-  gap:12px;padding:10px 0;border-bottom:0.5px solid var(--sep2);
+  gap:12px;padding:11px 16px;border-bottom:0.5px solid var(--sep2);
 }
 .detail-recent-row:last-child{border-bottom:none}
-.detail-recent-time{font-size:0.78rem;color:var(--label2);white-space:nowrap;flex-shrink:0}
-.detail-recent-meta{font-size:0.72rem;color:var(--label3);text-align:right;line-height:1.5}
+.detail-recent-time{font-size:0.78rem;color:var(--label2);white-space:nowrap;flex-shrink:0;font-weight:500}
+.detail-recent-meta{font-size:0.72rem;color:var(--label3);text-align:right;line-height:1.6}
 
 @media(max-width:520px){
   .wrap{padding:24px 16px 80px}
@@ -1227,37 +1264,51 @@ function renderAnalytics(data) {
 }
 
 // ── Detail modal per karyawan
+function closeDetailModal() {
+  const m = document.getElementById('detailModal');
+  if (m) m.classList.remove('open');
+}
+
 async function showDetailModal(slug, name) {
-  // Buat modal
   let modal = document.getElementById('detailModal');
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'detailModal';
-    modal.className = 'modal-overlay';
+    modal.className = 'modal-overlay detail-modal-overlay';
     modal.innerHTML = `
-      <div class="modal" style="max-width:480px;max-height:80vh;overflow-y:auto">
-        <div class="modal-handle"></div>
-        <h3 id="detailName" style="margin-bottom:16px"></h3>
-        <div id="detailContent"></div>
-        <div style="margin-top:20px;text-align:right">
-          <button class="btn-s" onclick="document.getElementById('detailModal').classList.remove('open')">Tutup</button>
+      <div class="detail-sheet">
+        <!-- Header sticky -->
+        <div class="detail-header">
+          <button class="detail-close" onclick="closeDetailModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Kembali
+          </button>
+          <div class="detail-header-title" id="detailName"></div>
+          <div style="width:72px"></div>
         </div>
+        <!-- Scrollable body -->
+        <div class="detail-body" id="detailContent"></div>
       </div>`;
-    modal.addEventListener('click', e => { if(e.target===modal) modal.classList.remove('open'); });
+    modal.addEventListener('click', e => { if(e.target===modal) closeDetailModal(); });
     document.body.appendChild(modal);
   }
+
   document.getElementById('detailName').textContent = name || slug;
-  document.getElementById('detailContent').innerHTML = '<div style="text-align:center;padding:24px;color:var(--label3)">Memuat...</div>';
+  document.getElementById('detailContent').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 20px;color:var(--label3)">
+      <div class="spinner" style="width:20px;height:20px;border-width:2.5px"></div>
+      <span style="font-size:0.82rem">Memuat data...</span>
+    </div>`;
   modal.classList.add('open');
 
   try {
     const rows = await sbFetch(`card_views?slug=eq.${encodeURIComponent(slug)}&select=device,os,browser,referrer,country,city,hour,viewed_at&order=viewed_at.desc&limit=200`);
     if (!rows || !rows.length) {
-      document.getElementById('detailContent').innerHTML = '<div style="text-align:center;padding:24px;color:var(--label3)">Belum ada data</div>';
+      document.getElementById('detailContent').innerHTML =
+        '<div style="text-align:center;padding:48px 20px;color:var(--label3);font-size:0.85rem">Belum ada data scan</div>';
       return;
     }
 
-    // Aggregate
     const byDevice   = countBy(rows, 'device');
     const byOS       = countBy(rows, 'os');
     const byBrowser  = countBy(rows, 'browser');
@@ -1267,35 +1318,41 @@ async function showDetailModal(slug, name) {
     const byHour     = Array(24).fill(0);
     rows.forEach(r => { if(r.hour!=null) byHour[r.hour]++; });
     const peakHour   = byHour.indexOf(Math.max(...byHour));
+    const peakCount  = byHour[peakHour];
 
-    // Recent views
     const recent = rows.slice(0,10).map(r => {
       const dt = new Date(r.viewed_at);
       const when = dt.toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       const loc = [r.city, r.country].filter(Boolean).join(', ') || 'Lokasi tidak diketahui';
-      const meta = [esc(r.device||'?'), esc(r.os||'?'), esc(r.browser||'')].filter(v=>v&&v!='?'&&v!='Unknown').join(' · ');
+      const meta = [r.device, r.os, r.browser].filter(v=>v&&v!='Unknown').map(v=>esc(v)).join(' · ') || '—';
       return `<div class="detail-recent-row">
         <div class="detail-recent-time">${when}</div>
-        <div class="detail-recent-meta">${esc(loc)}<br>${meta||'—'}</div>
+        <div class="detail-recent-meta">${esc(loc)}<br><span style="opacity:0.7">${meta}</span></div>
       </div>`;
     }).join('');
 
     document.getElementById('detailContent').innerHTML = `
-      ${section('Device', byDevice)}
-      ${section('OS', byOS)}
-      ${section('Browser', byBrowser)}
-      ${section('Sumber', byReferrer)}
-      ${section('Negara', byCountry)}
-      ${section('Kota', byCity)}
-      <div class="detail-section-label">Jam Paling Ramai</div>
-      <div class="detail-peak">
-        Jam <strong style="color:var(--label)">${peakHour}:00 – ${peakHour+1}:00</strong> paling banyak dibuka
-        <span style="color:var(--label3)"> · ${byHour[peakHour]}x</span>
-      </div>
-      <div class="detail-section-label">10 View Terakhir</div>
-      <div style="background:var(--bg2);border-radius:var(--r-md);padding:4px 16px;border:0.5px solid var(--sep)">${recent}</div>`;
+      <div class="detail-content-inner">
+        ${section('Device', byDevice)}
+        ${section('OS', byOS)}
+        ${section('Browser', byBrowser)}
+        ${section('Sumber Traffic', byReferrer)}
+        ${section('Negara', byCountry)}
+        ${section('Kota', byCity)}
+
+        <div class="detail-section-label">Jam Paling Ramai</div>
+        <div class="detail-peak">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--orange);flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div>Jam <strong style="color:var(--label)">${peakHour}:00 – ${peakHour+1}:00</strong> paling ramai
+          <span style="color:var(--label3);font-size:0.78rem;display:block;margin-top:2px">${peakCount > 0 ? peakCount + ' scan di jam ini' : 'Data belum cukup'}</span></div>
+        </div>
+
+        <div class="detail-section-label">10 View Terakhir</div>
+        <div class="ios-group" style="margin:0 0 32px">${recent}</div>
+      </div>`;
   } catch(e) {
-    document.getElementById('detailContent').innerHTML = `<div style="color:var(--red);font-size:0.85rem">Gagal memuat: ${esc(e.message)}</div>`;
+    document.getElementById('detailContent').innerHTML =
+      `<div style="padding:24px;color:var(--red);font-size:0.85rem;text-align:center">Gagal memuat: ${esc(e.message)}</div>`;
   }
 }
 
