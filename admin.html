@@ -419,42 +419,30 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-
 /* ─── ANALYTICS ─── */
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-@media(max-width:480px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
-.stat-card{background:var(--bg1);border-radius:var(--r-lg);border:0.5px solid var(--sep);padding:16px;display:flex;flex-direction:column;gap:4px}
-.stat-num{font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;line-height:1}
-.stat-label{font-size:0.72rem;color:var(--label3);font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
-.stat-sub{font-size:0.72rem;color:var(--label3);margin-top:2px}
-
-.chart-wrap{background:var(--bg1);border-radius:var(--r-lg);border:0.5px solid var(--sep);padding:18px;margin-bottom:20px}
-.chart-title{font-size:0.75rem;font-weight:600;color:var(--label3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px}
-.bar-chart{display:flex;align-items:flex-end;gap:4px;height:80px}
-.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.bar{width:100%;border-radius:4px 4px 0 0;background:var(--blue);min-height:3px;transition:height 0.5s cubic-bezier(.4,0,.2,1)}
-.bar.today{background:var(--green)}
-.bar-day{font-size:0.55rem;color:var(--label3);font-weight:500;text-align:center}
-.bar-val{font-size:0.6rem;color:var(--label3);font-weight:600;min-height:12px}
-
-.device-row{display:flex;gap:8px;margin-bottom:4px;align-items:center}
-.device-bar-bg{flex:1;height:6px;background:var(--bg2);border-radius:100px;overflow:hidden}
-.device-bar-fill{height:100%;border-radius:100px;transition:width 0.6s cubic-bezier(.4,0,.2,1)}
-.device-label{font-size:0.72rem;color:var(--label2);min-width:56px;font-weight:500}
-.device-pct{font-size:0.72rem;color:var(--label3);min-width:32px;text-align:right}
-
-.rank-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:0.5px solid var(--sep2)}
-.rank-item:last-child{border-bottom:none}
-.rank-num{font-size:0.7rem;font-weight:700;color:var(--label3);min-width:18px;text-align:center}
-.rank-info{flex:1;min-width:0}
-.rank-name{font-size:0.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-slug{font-size:0.65rem;color:var(--blue);font-family:monospace;margin-top:1px;opacity:0.7}
-.rank-count{font-size:1.1rem;font-weight:700;letter-spacing:-0.02em;color:var(--label)}
-.rank-count-label{font-size:0.62rem;color:var(--label3);font-weight:400}
-
-.analytics-refresh{display:flex;justify-content:flex-end;margin-bottom:14px}
-.refresh-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--label3);background:var(--bg1);border:0.5px solid var(--sep);border-radius:100px;padding:6px 14px;cursor:pointer;font-family:var(--font);transition:all var(--t)}
-.refresh-btn:hover{color:var(--label);border-color:var(--sep)}
+.stat-box{
+  background:var(--bg1);border:0.5px solid var(--sep);
+  border-radius:var(--r-md);padding:16px 12px;text-align:center;
+}
+.stat-num{font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;line-height:1}
+.stat-lbl{font-size:0.65rem;color:var(--label3);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-top:4px}
+.arow{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:0.5px solid var(--sep2);
+}
+.arow:last-child{border-bottom:none}
+.arow-avatar{width:36px;height:36px;border-radius:50%;background:var(--bg2);border:0.5px solid var(--sep);display:flex;align-items:center;justify-content:center;font-size:0.9rem;font-weight:600;color:var(--label2);flex-shrink:0;overflow:hidden}
+.arow-avatar img{width:100%;height:100%;object-fit:cover}
+.arow-info{flex:1;min-width:0}
+.arow-name{font-size:0.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arow-pos{font-size:0.72rem;color:var(--label3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arow-stats{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.arow-total{font-size:1.1rem;font-weight:700;color:var(--blue);line-height:1}
+.arow-badge{font-size:0.62rem;font-weight:500;padding:2px 8px;border-radius:100px;white-space:nowrap}
+.badge-hot{background:rgba(255,69,58,0.15);color:var(--red)}
+.badge-ok{background:rgba(10,132,255,0.12);color:var(--blue)}
+.badge-cold{background:var(--bg2);color:var(--label3)}
+.arow-last{font-size:0.62rem;color:var(--label3);margin-top:2px}
 
 @media(max-width:520px){
   .wrap{padding:24px 16px 80px}
@@ -508,7 +496,7 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
   <div class="seg-wrap">
     <button class="tab-btn active" onclick="switchTab('list')">Semua Card</button>
     <button class="tab-btn" onclick="switchTab('create')" id="tabCreate">Buat Card Baru</button>
-    <button class="tab-btn" onclick="switchTab('analytics')" id="tabAnalytics">Analytics</button>
+    <button class="tab-btn" onclick="switchTab('analytics')">Statistik</button>
   </div>
 
   <!-- ── LIST TAB ── -->
@@ -664,18 +652,27 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
       <button class="btn-s" onclick="cancelEdit()">Batal</button>
     </div>
   </div><!-- /panelCreate -->
+</div><!-- /wrap -->
 
-  <!-- ANALYTICS TAB -->
+  <!-- ── ANALYTICS TAB ── -->
   <div class="tab-panel" id="panelAnalytics">
-    <div id="analyticsContent">
-      <div class="empty-state" id="analyticsLoading">
-        <div class="loading-line" style="margin:0 auto"></div>
-        <div class="empty-desc" style="margin-top:12px">Memuat data analytics...</div>
-      </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:0.78rem;color:var(--label3);font-weight:500" id="analyticsLastRefresh"></div>
+      <button class="fab" onclick="loadAnalytics()" style="font-size:0.75rem;padding:8px 16px;box-shadow:none;background:var(--bg1);border:0.5px solid var(--sep);color:var(--label2)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">
+      <div class="stat-box" id="statTotal"><div class="stat-num">—</div><div class="stat-lbl">Total Scan</div></div>
+      <div class="stat-box" id="stat7d"><div class="stat-num">—</div><div class="stat-lbl">7 Hari</div></div>
+      <div class="stat-box" id="stat30d"><div class="stat-num">—</div><div class="stat-lbl">30 Hari</div></div>
+    </div>
+    <div class="ios-section-label">Per Karyawan</div>
+    <div class="ios-group" id="analyticsTable">
+      <div style="text-align:center;padding:40px 20px;color:var(--label3);font-size:0.85rem">Memuat data...</div>
     </div>
   </div>
-
-</div><!-- /wrap -->
 
 <!-- DELETE MODAL -->
 <div class="modal-overlay" id="deleteModal">
@@ -861,7 +858,8 @@ function switchTab(tab) {
   if (tab === 'list' && isFormDirty()) {
     if (!confirm('Form belum disimpan. Tinggalkan halaman ini?')) return;
   }
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='list')||(i===1&&tab==='create')||(i===2&&tab==='analytics')));
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active',
+    (i===0&&tab==='list')||(i===1&&tab==='create')||(i===2&&tab==='analytics')));
   document.getElementById('panelList').classList.toggle('active', tab === 'list');
   document.getElementById('panelCreate').classList.toggle('active', tab === 'create');
   document.getElementById('panelAnalytics').classList.toggle('active', tab === 'analytics');
@@ -1089,145 +1087,171 @@ async function confirmDelete() {
   }
 }
 
-
-// ── ANALYTICS ──────────────────────────────────────────────
-let analyticsLoaded = false;
-
-async function loadAnalytics(force = false) {
-  if (analyticsLoaded && !force) return;
-  analyticsLoaded = true;
-  const container = document.getElementById('analyticsContent');
-  container.innerHTML = '<div class="empty-state" id="analyticsLoading"><div class="loading-line" style="margin:0 auto"></div><div class="empty-desc" style="margin-top:12px">Memuat data analytics...</div></div>';
-
-  try {
-    // Ambil semua views (maks 5000 rows)
-    const viewsRes = await sbFetch('card_views?select=slug,viewed_at,device&order=viewed_at.desc&limit=5000');
-    const views = viewsRes || [];
-
-    // Total
-    const totalViews = views.length;
-
-    // Unique slugs yang pernah dibuka
-    const uniqueSlugs = new Set(views.map(v => v.slug)).size;
-
-    // Views hari ini
-    const todayStr = new Date().toISOString().slice(0,10);
-    const todayViews = views.filter(v => v.viewed_at && v.viewed_at.startsWith(todayStr)).length;
-
-    // 7 hari terakhir
-    const days7 = [];
-    const dayLabels = [];
-    const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-    const now = new Date();
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      const ds = d.toISOString().slice(0,10);
-      days7.push({date: ds, count: views.filter(v => v.viewed_at && v.viewed_at.startsWith(ds)).length});
-      dayLabels.push(i === 0 ? 'Hari ini' : dayNames[d.getDay()]);
-    }
-    const maxDay = Math.max(...days7.map(d => d.count), 1);
-
-    // Device breakdown
-    const mobileCount = views.filter(v => v.device === 'mobile').length;
-    const desktopCount = views.filter(v => v.device === 'desktop').length;
-    const mobileP = totalViews ? Math.round(mobileCount / totalViews * 100) : 0;
-    const desktopP = totalViews ? 100 - mobileP : 0;
-
-    // Per-card ranking
-    const cardCounts = {};
-    views.forEach(v => { cardCounts[v.slug] = (cardCounts[v.slug] || 0) + 1; });
-    const ranked = Object.entries(cardCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
-
-    // Render
-    container.innerHTML = `
-      <div class="analytics-refresh">
-        <button class="refresh-btn" onclick="analyticsLoaded=false;loadAnalytics(true)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Refresh
-        </button>
-      </div>
-
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-num">${totalViews.toLocaleString('id')}</div>
-          <div class="stat-label">Total Scan</div>
-          <div class="stat-sub">semua waktu</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" style="color:var(--green)">${todayViews}</div>
-          <div class="stat-label">Hari Ini</div>
-          <div class="stat-sub">${todayStr}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" style="color:var(--blue)">${uniqueSlugs}</div>
-          <div class="stat-label">Card Aktif</div>
-          <div class="stat-sub">pernah dibuka</div>
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Scan 7 Hari Terakhir</div>
-        <div class="bar-chart" id="barChart">
-          ${days7.map((d,i) => `
-            <div class="bar-col">
-              <div class="bar-val">${d.count > 0 ? d.count : ''}</div>
-              <div class="bar ${i===6?'today':''}" style="height:${Math.max(d.count/maxDay*100,3)}%"></div>
-              <div class="bar-day">${dayLabels[i]}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <div class="chart-wrap">
-        <div class="chart-title">Perangkat</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div>
-            <div class="device-row">
-              <span class="device-label">📱 Mobile</span>
-              <div class="device-bar-bg"><div class="device-bar-fill" style="width:${mobileP}%;background:var(--blue)"></div></div>
-              <span class="device-pct">${mobileP}%</span>
-            </div>
-          </div>
-          <div>
-            <div class="device-row">
-              <span class="device-label">🖥 Desktop</span>
-              <div class="device-bar-bg"><div class="device-bar-fill" style="width:${desktopP}%;background:var(--purple)"></div></div>
-              <span class="device-pct">${desktopP}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      ${ranked.length ? `
-      <div class="ios-section-label">Ranking Card Terpopuler</div>
-      <div class="ios-group" style="margin-bottom:24px">
-        ${ranked.map(([slug, count], i) => {
-          const card = allCards.find(c => c.slug === slug);
-          const name = card ? esc(card.name) : esc(slug);
-          return `<div class="rank-item">
-            <div class="rank-num">${i+1}</div>
-            <div class="rank-info">
-              <div class="rank-name">${name}</div>
-              <div class="rank-slug">${esc(slug)}</div>
-            </div>
-            <div style="text-align:right">
-              <div class="rank-count">${count}</div>
-              <div class="rank-count-label">scan</div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-      ` : '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Belum ada data</div><div class="empty-desc">Data scan akan muncul setelah kartu pertama dibuka</div></div>'}
-    `;
-  } catch(e) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Gagal memuat analytics</div><div class="empty-desc">${esc(e.message)}</div></div>`;
-  }
-}
-
 document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+// ── Analytics
+let analyticsLoaded = false;
+async function loadAnalytics() {
+  const table = document.getElementById('analyticsTable');
+  table.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--label3);font-size:0.85rem">Memuat data...</div>';
+  document.getElementById('analyticsLastRefresh').textContent = '';
+
+  try {
+    const data = await sbFetch('card_view_stats?select=*&order=total_views.desc');
+    renderAnalytics(data || []);
+    const now = new Date();
+    document.getElementById('analyticsLastRefresh').textContent =
+      'Diperbarui ' + now.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    table.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--red);font-size:0.85rem">Gagal memuat: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderAnalytics(data) {
+  const totalViews = data.reduce((s,r) => s + (r.total_views||0), 0);
+  const views7d    = data.reduce((s,r) => s + (r.views_7d||0), 0);
+  const views30d   = data.reduce((s,r) => s + (r.views_30d||0), 0);
+  document.getElementById('statTotal').querySelector('.stat-num').textContent = totalViews.toLocaleString('id');
+  document.getElementById('stat7d').querySelector('.stat-num').textContent    = views7d.toLocaleString('id');
+  document.getElementById('stat30d').querySelector('.stat-num').textContent   = views30d.toLocaleString('id');
+
+  const table = document.getElementById('analyticsTable');
+  if (!data.length) {
+    table.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--label3);font-size:0.85rem">Belum ada data scan</div>';
+    return;
+  }
+  table.innerHTML = '';
+  data.forEach(r => {
+    const card = allCards.find(c => c.slug === r.slug) || {};
+    const initials = (r.name || 'K').charAt(0).toUpperCase();
+    const photo = card.photo;
+    const v7 = r.views_7d || 0;
+    const badgeCls = v7 >= 10 ? 'badge-hot' : v7 >= 3 ? 'badge-ok' : 'badge-cold';
+    const badgeTxt = v7 >= 10 ? '🔥 Trending' : v7 > 0 ? `+${v7} minggu ini` : 'Belum ada scan';
+    const lastSeen = r.last_viewed
+      ? new Date(r.last_viewed).toLocaleString('id-ID', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : '—';
+
+    const row = document.createElement('div');
+    row.className = 'arow';
+    row.style.cursor = 'pointer';
+    row.onclick = () => showDetailModal(r.slug, r.name);
+    row.innerHTML = `
+      <div class="arow-avatar">${photo ? `<img src="${photo}" alt="">` : initials}</div>
+      <div class="arow-info">
+        <div class="arow-name">${esc(r.name||'—')}</div>
+        <div class="arow-pos">${esc(r.position||'')}${r.position&&r.company?' · ':''}${esc(r.company||'')}</div>
+        <div class="arow-last" style="margin-top:3px">Terakhir: ${lastSeen}</div>
+      </div>
+      <div class="arow-stats">
+        <div class="arow-total">${(r.total_views||0).toLocaleString('id')}</div>
+        <div class="arow-badge ${badgeCls}">${badgeTxt}</div>
+        <div style="font-size:0.62rem;color:var(--label3);margin-top:4px">tap detail →</div>
+      </div>`;
+    table.appendChild(row);
+  });
+}
+
+// ── Detail modal per karyawan
+async function showDetailModal(slug, name) {
+  // Buat modal
+  let modal = document.getElementById('detailModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'detailModal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="modal" style="max-width:480px;max-height:80vh;overflow-y:auto">
+        <div class="modal-handle"></div>
+        <h3 id="detailName" style="margin-bottom:16px"></h3>
+        <div id="detailContent"></div>
+        <div style="margin-top:20px;text-align:right">
+          <button class="btn-s" onclick="document.getElementById('detailModal').classList.remove('open')">Tutup</button>
+        </div>
+      </div>`;
+    modal.addEventListener('click', e => { if(e.target===modal) modal.classList.remove('open'); });
+    document.body.appendChild(modal);
+  }
+  document.getElementById('detailName').textContent = name || slug;
+  document.getElementById('detailContent').innerHTML = '<div style="text-align:center;padding:24px;color:var(--label3)">Memuat...</div>';
+  modal.classList.add('open');
+
+  try {
+    const rows = await sbFetch(`card_views?slug=eq.${encodeURIComponent(slug)}&select=device,os,browser,referrer,country,city,hour,viewed_at&order=viewed_at.desc&limit=200`);
+    if (!rows || !rows.length) {
+      document.getElementById('detailContent').innerHTML = '<div style="text-align:center;padding:24px;color:var(--label3)">Belum ada data</div>';
+      return;
+    }
+
+    // Aggregate
+    const byDevice   = countBy(rows, 'device');
+    const byOS       = countBy(rows, 'os');
+    const byBrowser  = countBy(rows, 'browser');
+    const byReferrer = countBy(rows, 'referrer');
+    const byCountry  = countBy(rows, 'country');
+    const byCity     = countBy(rows, 'city');
+    const byHour     = Array(24).fill(0);
+    rows.forEach(r => { if(r.hour!=null) byHour[r.hour]++; });
+    const peakHour   = byHour.indexOf(Math.max(...byHour));
+
+    // Recent views
+    const recent = rows.slice(0,10).map(r => {
+      const dt = new Date(r.viewed_at);
+      const when = dt.toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const loc = [r.city, r.country].filter(Boolean).join(', ') || 'Lokasi tidak diketahui';
+      return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--sep2);font-size:0.78rem">
+        <div style="color:var(--label2)">${when}</div>
+        <div style="color:var(--label3);text-align:right">${esc(loc)} · ${esc(r.device||'?')} · ${esc(r.os||'?')}</div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('detailContent').innerHTML = `
+      ${section('Device', byDevice)}
+      ${section('OS', byOS)}
+      ${section('Browser', byBrowser)}
+      ${section('Sumber', byReferrer)}
+      ${section('Negara', byCountry)}
+      ${section('Kota', byCity)}
+      <div class="ios-section-label" style="margin-top:20px">Jam Paling Ramai</div>
+      <div style="background:var(--bg2);border-radius:var(--r-md);padding:14px 16px;font-size:0.85rem;color:var(--label2)">
+        Jam <strong style="color:var(--label)">${peakHour}:00–${peakHour+1}:00</strong> paling banyak dibuka
+        <span style="color:var(--label3)"> (${byHour[peakHour]}x)</span>
+      </div>
+      <div class="ios-section-label" style="margin-top:20px">10 View Terakhir</div>
+      <div style="background:var(--bg1);border-radius:var(--r-md);padding:8px 16px;border:0.5px solid var(--sep)">${recent}</div>`;
+  } catch(e) {
+    document.getElementById('detailContent').innerHTML = `<div style="color:var(--red);font-size:0.85rem">Gagal memuat: ${esc(e.message)}</div>`;
+  }
+}
+
+function countBy(arr, key) {
+  const out = {};
+  arr.forEach(r => {
+    const v = r[key] || 'Unknown';
+    out[v] = (out[v]||0) + 1;
+  });
+  return out;
+}
+
+function section(label, obj) {
+  const entries = Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if (!entries.length) return '';
+  const total = entries.reduce((s,e)=>s+e[1],0);
+  const bars = entries.map(([k,v]) => {
+    const pct = Math.round(v/total*100);
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="font-size:0.78rem;color:var(--label2);min-width:80px;flex-shrink:0">${esc(k)}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:100px;height:6px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:var(--blue);border-radius:100px;transition:width 0.4s ease"></div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--label3);min-width:32px;text-align:right">${pct}%</div>
+    </div>`;
+  }).join('');
+  return `<div class="ios-section-label" style="margin-top:20px">${label}</div>
+    <div style="background:var(--bg1);border-radius:var(--r-md);padding:14px 16px;border:0.5px solid var(--sep)">${bars}</div>`;
+}
 </script>
 </body>
 </html>
