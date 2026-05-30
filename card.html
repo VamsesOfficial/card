@@ -472,11 +472,9 @@ async function trackView(card) {
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify({
-        card_id:     card.id,
-        slug:        card.slug,
-        device_type: device,
-        os:          os,
-        referrer:    referrer
+        slug:     card.slug,
+        device:   device === 'tablet' ? 'mobile' : device,
+        referrer: referrer
       })
     });
   } catch(e) {
