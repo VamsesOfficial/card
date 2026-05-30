@@ -257,6 +257,18 @@ async function fetchCard(slug){
   return data&&data.length?data[0]:null;
 }
 
+async function trackView(slug){
+  try{
+    const device=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?'mobile':'desktop';
+    const referrer=document.referrer?new URL(document.referrer).hostname:'direct';
+    await fetch(`${SUPA_URL}/rest/v1/card_views`,{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({slug,device,referrer})
+    });
+  }catch(e){/* silent fail — jangan ganggu UX */}
+}
+
 window.addEventListener('DOMContentLoaded',async()=>{
   const slug=getSlug();
   if(!slug){showNotFound();return;}
@@ -270,6 +282,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
     updateMetaTags(D);
     renderCard(D);
     document.getElementById('cardWrap').style.display='block';
+    trackView(slug); // log setelah kartu berhasil dimuat
   }catch(e){
     document.getElementById('skeletonWrap').style.display='none';
     showNotFound();

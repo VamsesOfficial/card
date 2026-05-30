@@ -419,6 +419,43 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
 }
 @keyframes spin{to{transform:rotate(360deg)}}
 
+
+/* ─── ANALYTICS ─── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:480px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--bg1);border-radius:var(--r-lg);border:0.5px solid var(--sep);padding:16px;display:flex;flex-direction:column;gap:4px}
+.stat-num{font-size:1.8rem;font-weight:700;letter-spacing:-0.03em;line-height:1}
+.stat-label{font-size:0.72rem;color:var(--label3);font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.stat-sub{font-size:0.72rem;color:var(--label3);margin-top:2px}
+
+.chart-wrap{background:var(--bg1);border-radius:var(--r-lg);border:0.5px solid var(--sep);padding:18px;margin-bottom:20px}
+.chart-title{font-size:0.75rem;font-weight:600;color:var(--label3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:14px}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:80px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;background:var(--blue);min-height:3px;transition:height 0.5s cubic-bezier(.4,0,.2,1)}
+.bar.today{background:var(--green)}
+.bar-day{font-size:0.55rem;color:var(--label3);font-weight:500;text-align:center}
+.bar-val{font-size:0.6rem;color:var(--label3);font-weight:600;min-height:12px}
+
+.device-row{display:flex;gap:8px;margin-bottom:4px;align-items:center}
+.device-bar-bg{flex:1;height:6px;background:var(--bg2);border-radius:100px;overflow:hidden}
+.device-bar-fill{height:100%;border-radius:100px;transition:width 0.6s cubic-bezier(.4,0,.2,1)}
+.device-label{font-size:0.72rem;color:var(--label2);min-width:56px;font-weight:500}
+.device-pct{font-size:0.72rem;color:var(--label3);min-width:32px;text-align:right}
+
+.rank-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:0.5px solid var(--sep2)}
+.rank-item:last-child{border-bottom:none}
+.rank-num{font-size:0.7rem;font-weight:700;color:var(--label3);min-width:18px;text-align:center}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:0.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-slug{font-size:0.65rem;color:var(--blue);font-family:monospace;margin-top:1px;opacity:0.7}
+.rank-count{font-size:1.1rem;font-weight:700;letter-spacing:-0.02em;color:var(--label)}
+.rank-count-label{font-size:0.62rem;color:var(--label3);font-weight:400}
+
+.analytics-refresh{display:flex;justify-content:flex-end;margin-bottom:14px}
+.refresh-btn{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--label3);background:var(--bg1);border:0.5px solid var(--sep);border-radius:100px;padding:6px 14px;cursor:pointer;font-family:var(--font);transition:all var(--t)}
+.refresh-btn:hover{color:var(--label);border-color:var(--sep)}
+
 @media(max-width:520px){
   .wrap{padding:24px 16px 80px}
   .page-title{font-size:1.5rem}
@@ -471,6 +508,7 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
   <div class="seg-wrap">
     <button class="tab-btn active" onclick="switchTab('list')">Semua Card</button>
     <button class="tab-btn" onclick="switchTab('create')" id="tabCreate">Buat Card Baru</button>
+    <button class="tab-btn" onclick="switchTab('analytics')" id="tabAnalytics">Analytics</button>
   </div>
 
   <!-- ── LIST TAB ── -->
@@ -626,6 +664,17 @@ body{background:var(--bg);color:var(--label);font-family:var(--font);font-weight
       <button class="btn-s" onclick="cancelEdit()">Batal</button>
     </div>
   </div><!-- /panelCreate -->
+
+  <!-- ANALYTICS TAB -->
+  <div class="tab-panel" id="panelAnalytics">
+    <div id="analyticsContent">
+      <div class="empty-state" id="analyticsLoading">
+        <div class="loading-line" style="margin:0 auto"></div>
+        <div class="empty-desc" style="margin-top:12px">Memuat data analytics...</div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /wrap -->
 
 <!-- DELETE MODAL -->
@@ -812,9 +861,11 @@ function switchTab(tab) {
   if (tab === 'list' && isFormDirty()) {
     if (!confirm('Form belum disimpan. Tinggalkan halaman ini?')) return;
   }
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='list')||(i===1&&tab==='create')));
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0&&tab==='list')||(i===1&&tab==='create')||(i===2&&tab==='analytics')));
   document.getElementById('panelList').classList.toggle('active', tab === 'list');
   document.getElementById('panelCreate').classList.toggle('active', tab === 'create');
+  document.getElementById('panelAnalytics').classList.toggle('active', tab === 'analytics');
+  if (tab === 'analytics') loadAnalytics();
 }
 
 document.getElementById('photoInput').addEventListener('change', function(e) {
@@ -1035,6 +1086,142 @@ async function confirmDelete() {
   } catch(e) {
     showToast('Gagal hapus: ' + e.message, 'error');
     btn.disabled = false; btn.innerHTML = 'Hapus';
+  }
+}
+
+
+// ── ANALYTICS ──────────────────────────────────────────────
+let analyticsLoaded = false;
+
+async function loadAnalytics(force = false) {
+  if (analyticsLoaded && !force) return;
+  analyticsLoaded = true;
+  const container = document.getElementById('analyticsContent');
+  container.innerHTML = '<div class="empty-state" id="analyticsLoading"><div class="loading-line" style="margin:0 auto"></div><div class="empty-desc" style="margin-top:12px">Memuat data analytics...</div></div>';
+
+  try {
+    // Ambil semua views (maks 5000 rows)
+    const viewsRes = await sbFetch('card_views?select=slug,viewed_at,device&order=viewed_at.desc&limit=5000');
+    const views = viewsRes || [];
+
+    // Total
+    const totalViews = views.length;
+
+    // Unique slugs yang pernah dibuka
+    const uniqueSlugs = new Set(views.map(v => v.slug)).size;
+
+    // Views hari ini
+    const todayStr = new Date().toISOString().slice(0,10);
+    const todayViews = views.filter(v => v.viewed_at && v.viewed_at.startsWith(todayStr)).length;
+
+    // 7 hari terakhir
+    const days7 = [];
+    const dayLabels = [];
+    const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const ds = d.toISOString().slice(0,10);
+      days7.push({date: ds, count: views.filter(v => v.viewed_at && v.viewed_at.startsWith(ds)).length});
+      dayLabels.push(i === 0 ? 'Hari ini' : dayNames[d.getDay()]);
+    }
+    const maxDay = Math.max(...days7.map(d => d.count), 1);
+
+    // Device breakdown
+    const mobileCount = views.filter(v => v.device === 'mobile').length;
+    const desktopCount = views.filter(v => v.device === 'desktop').length;
+    const mobileP = totalViews ? Math.round(mobileCount / totalViews * 100) : 0;
+    const desktopP = totalViews ? 100 - mobileP : 0;
+
+    // Per-card ranking
+    const cardCounts = {};
+    views.forEach(v => { cardCounts[v.slug] = (cardCounts[v.slug] || 0) + 1; });
+    const ranked = Object.entries(cardCounts).sort((a,b) => b[1]-a[1]).slice(0,10);
+
+    // Render
+    container.innerHTML = `
+      <div class="analytics-refresh">
+        <button class="refresh-btn" onclick="analyticsLoaded=false;loadAnalytics(true)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-num">${totalViews.toLocaleString('id')}</div>
+          <div class="stat-label">Total Scan</div>
+          <div class="stat-sub">semua waktu</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--green)">${todayViews}</div>
+          <div class="stat-label">Hari Ini</div>
+          <div class="stat-sub">${todayStr}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--blue)">${uniqueSlugs}</div>
+          <div class="stat-label">Card Aktif</div>
+          <div class="stat-sub">pernah dibuka</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Scan 7 Hari Terakhir</div>
+        <div class="bar-chart" id="barChart">
+          ${days7.map((d,i) => `
+            <div class="bar-col">
+              <div class="bar-val">${d.count > 0 ? d.count : ''}</div>
+              <div class="bar ${i===6?'today':''}" style="height:${Math.max(d.count/maxDay*100,3)}%"></div>
+              <div class="bar-day">${dayLabels[i]}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-title">Perangkat</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <div class="device-row">
+              <span class="device-label">📱 Mobile</span>
+              <div class="device-bar-bg"><div class="device-bar-fill" style="width:${mobileP}%;background:var(--blue)"></div></div>
+              <span class="device-pct">${mobileP}%</span>
+            </div>
+          </div>
+          <div>
+            <div class="device-row">
+              <span class="device-label">🖥 Desktop</span>
+              <div class="device-bar-bg"><div class="device-bar-fill" style="width:${desktopP}%;background:var(--purple)"></div></div>
+              <span class="device-pct">${desktopP}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      ${ranked.length ? `
+      <div class="ios-section-label">Ranking Card Terpopuler</div>
+      <div class="ios-group" style="margin-bottom:24px">
+        ${ranked.map(([slug, count], i) => {
+          const card = allCards.find(c => c.slug === slug);
+          const name = card ? esc(card.name) : esc(slug);
+          return `<div class="rank-item">
+            <div class="rank-num">${i+1}</div>
+            <div class="rank-info">
+              <div class="rank-name">${name}</div>
+              <div class="rank-slug">${esc(slug)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="rank-count">${count}</div>
+              <div class="rank-count-label">scan</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      ` : '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Belum ada data</div><div class="empty-desc">Data scan akan muncul setelah kartu pertama dibuka</div></div>'}
+    `;
+  } catch(e) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Gagal memuat analytics</div><div class="empty-desc">${esc(e.message)}</div></div>`;
   }
 }
 
